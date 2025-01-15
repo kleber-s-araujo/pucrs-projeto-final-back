@@ -8,7 +8,8 @@
  * Este Desenvolvimento via receber requisições e processá-las acessando o Banco de Dados MySQL via Docker
  */
 
-const mysql     = require('mysql');
+//
+const mysql     = require('mysql2');
 const dbConfig  = require('../config/db.config.js');
 
 // Create a connection to the database
