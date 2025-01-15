@@ -30,30 +30,35 @@ CREATE TABLE capacidadeRenderizador (
 CREATE TABLE pacoteRender (
   id INT,
   lang VARCHAR(2),
-  description VARCHAR(30),
+  descricao VARCHAR(30),
   PRIMARY KEY (id, lang)
 );
 
 CREATE TABLE tipoPrioridade (
   id INT,
   lang VARCHAR(2),
-  description VARCHAR(30),
+  descricao VARCHAR(30),
   PRIMARY KEY (id, lang)
 );
 
 CREATE TABLE tipoStatus (
   id INT,
   lang VARCHAR(2),
-  description VARCHAR(30),
+  descricao VARCHAR(100),
   PRIMARY KEY (id, lang)
 );
 
 CREATE TABLE tipoRole (
   id INT,
   lang VARCHAR(2),
-  description VARCHAR(100),
+  descricao VARCHAR(100),
   PRIMARY KEY (id, lang)
 );
+
+
+#############################################################
+#                Transactional Data Tables                  #
+#############################################################
 
 CREATE TABLE cliente (
   id INT AUTO_INCREMENT,
@@ -105,10 +110,6 @@ CREATE TABLE equipeRenderizador (
   FOREIGN KEY (idRenderizador) REFERENCES renderizador(id) ON DELETE RESTRICT,
   FOREIGN KEY (roleRenderizador) REFERENCES tipoRole(id) ON DELETE RESTRICT
 );
-
-#############################################################
-#                Transactional Data Tables                  #
-#############################################################
 
 CREATE TABLE requisicaoRender (
   id INT AUTO_INCREMENT,

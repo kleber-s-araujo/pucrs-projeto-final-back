@@ -18,35 +18,5 @@ module.exports = app => {
         res.json({ dbstatus: `DB ${db.state}` });
     });
 
-    router.get('/dbInit', async (req, res) => {
-
-        //Path to SQL File
-        const filePath = path.join(__dirname, '../db/dbInit.sql');
-
-        // Reads the SQL file
-        fs.readFile(filePath, 'utf8', (err, sql) => {
-
-            if (err) {
-                console.error('Error reading SQL file:', err);
-                return;
-            }
-
-            db.query(sql, (err, result) => {
-
-                if (err)
-                    throw err;
-                else 
-                    res.send("Query run successfully");
-
-            });
-
-            db.end();
-
-            res.json({ dbstatus: `DB ${db.state}` });
-
-        });
-
-    });
-
     app.use('/api/statuscheck', router);
 }

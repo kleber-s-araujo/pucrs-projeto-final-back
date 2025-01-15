@@ -11,7 +11,6 @@
 const express = require('express');
 const cors    = require('cors');
 const app     = express();
-const { body, validationResult } = require('express-validator');
 
 var corsOptions = {
   origin: "http://localhost:8081"
@@ -25,7 +24,7 @@ app.use(express.json());
 // Parse das Requisições do tipo "application/x-www-form-urlencoded"
 app.use(express.urlencoded({ extended: true }));
 
-// Rota Simples
+// Rota Master
 app.get("/", (req, res) => {
   
   res.json({ message: "Bem Vindo ao Backend!", dbstatus: `DB ${db.state}.` });
@@ -35,9 +34,11 @@ app.get("/", (req, res) => {
 // DB Connection Init
 const db = require("./models/db.js");
 
+// Rotas da Aplicação
 require("./routes/test-rotas.js")(app);
 require("./routes/test-rotas2.js")(app);
-require("./routes/statuscheck.js")(app);
+require("./routes/dadosMestre.js")(app);
+//require("./routes/statuscheck.js")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
