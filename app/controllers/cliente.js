@@ -18,8 +18,8 @@ class ClienteController {
             const query = `
                 SELECT c.*, t.descricao as tipoClienteDesc 
                 FROM cliente c
-                JOIN tipoCliente t ON c.capacidade = t.id
-                WHERE c.lang = ?;
+                JOIN tipoCliente t ON c.tipo = t.id
+                WHERE t.lang = ?;
             `;
             const [rows] = await dbConnection.promise().query(query, req.params.lang);
 

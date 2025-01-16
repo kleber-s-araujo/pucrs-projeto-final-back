@@ -37,7 +37,7 @@ const db = require("./models/db.js");
 // Rotas da Aplicação
 require("./routes/dadosMestre.js")(app);
 require("./routes/renderizador.js")(app);
-//require("./routes/test-rotas.js")(app);
+require("./routes/cliente.js")(app);
 //require("./routes/statuscheck.js")(app);
 
 // set port, listen for requests
