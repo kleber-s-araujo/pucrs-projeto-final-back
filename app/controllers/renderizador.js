@@ -2,45 +2,216 @@
  * @Author: Kleber Araujo
  * @Email:  kleberslvaraujo@gmail.com
  * @Date:   2025-01-12
- * @Last Modified by: Kleber Araujo
- * @Last Modified time: 2025-01-14 00:13 
  * @Description: Backend da Aplicação Desenvolvida para o curso de pós-graduação em Desenvolvimento FullStack - PUCRS
  * Este Desenvolvimento via receber requisições e processá-las acessando o Banco de Dados MySQL via Docker
  */
 
+const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 const dbConnection = require('../models/db.js');
 
-// --> Renderizador
-const getAllRenderizadores = async (req, res) => {
-    try {
-        const query = `
-            SELECT r.*, c.descricao as capacidadeDescricao 
-            FROM renderizador r
-            JOIN capacidadeRenderizador c ON r.capacidade = c.id
-            WHERE c.lang = ?;
-        `;
-        const [rows] = await dbConnection.promise().query(query, [req.params.lang]);
-        
-        // Remove a senha da resposta
-        const safeRows = rows.map(row => {
-            const { senha, ...safeRow } = row;
-            return safeRow;
-        });
+class RenderizadorController {
 
-        res.status(200).json(safeRows);
+    // Lista Todos os Renderizadores
+    async getAllRenderizadores(req, res) {
+        try {
+            const query = `
+                SELECT r.*, c.descricao as capacidadeDescricao 
+                FROM renderizador r
+                JOIN capacidadeRenderizador c ON r.capacidade = c.id
+                WHERE c.lang = ?;
+            `;
+            const [rows] = await dbConnection.promise().query(query, [req.params.lang]);
 
-    } catch (error) {
-        console.error('Erro ao Selecionar os Renderizadores:', error);
-        res.status(500).json({
-            error: 'Internal server error',
-            details: error.message
-        });
+            // Remove a senha da resposta
+            const safeRows = rows.map(row => {
+                const { senha, ...safeRow } = row;
+                return safeRow;
+            });
+
+            res.status(200).json(safeRows);
+
+        } catch (error) {
+            console.error('Erro ao Selecionar os Renderizadores:', error);
+            res.status(500).json({
+                error: 'Internal server error',
+                details: error.message
+            });
+        }
     }
-}
 
+    // Busca Renderizador pelo ID
+    async getRenderizadorById(req, res) {
+        try {
+            const { id, lang } = req.params;
+            const query = `
+                SELECT r.*, c.descricao as capacidadeDescricao 
+                FROM renderizador r
+                JOIN capacidadeRenderizador c ON r.capacidade = c.id
+                WHERE r.id = ?
+                AND c.lang = ?
+            `;
 
+            const [rows] = await dbConnection.promise().query(query, [id, lang]);
 
-module.exports = {
-    getAllRenderizadores
-}
+            if (rows.length === 0) {
+                return res.status(404).json({
+                    message: 'Renderizador não encontrado.'
+                });
+            }
+
+            res.status(200).json(rows[0]);
+
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({
+                message: 'Erro ao buscar Renderizador',
+                error: error.message
+            });
+        }
+    }
+
+    // Cria novo Renderizador
+    async createRenderizador(req, res) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            const hashedSenha = await bcrypt.hash(req.body.senha, 10);
+
+            const query = `
+                INSERT INTO renderizador 
+                (nome, email, senha, fotoPerfil, descricao, dataRegistro, capacidade)
+                VALUES (?, ?, ?, ?, ?, NOW(), ?);
+            `;
+
+            const [result] = await dbConnection.promise().query(query,
+                [req.body.nome, req.body.email, hashedSenha, req.body.fotoPerfil || null, req.body.descricao || null, req.body.capacidade]);
+
+            res.status(201).json({
+                message: 'Renderizador criado com sucesso',
+                id: result.insertId
+            });
+
+        } catch (error) {
+            console.error('Erro:', error);
+            res.status(500).json({
+                message: 'Erro ao criar novo Renderizador',
+                error: error.message
+            });
+        }
+
+    }
+
+    //Atualiza Renderizador
+    async updateRenderizador(req, res) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            const { id } = req.params;
+            const { nome, email, senha, fotoPerfil, descricao, capacidade } = req.body;
+
+            const query = ` 
+                UPDATE renderizador
+                SET nome = ?, email = ?, fotoPerfil = ?, descricao = ?, capacidade = ?
+                WHERE id = ?;
+            `;
+
+            const params = [nome, email, fotoPerfil || null, descricao || null, capacidade];
+            params.push(id);
+            const [result] = await dbConnection.promise().query(query, params);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({
+                    message: 'Renderizador não encontrado'
+                });
+            }
+
+            res.status(200).json({
+                message: 'Renderizador Atualizado com Sucesso!',
+                result: result.affectedRows
+            });
+
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({
+                message: 'Erro ao atualizar Renderizador',
+                error: error.message
+            });
+        }
+    }
+
+    //Desabilita Renderizador
+    async deleteRenderizador(req, res) {
+        try {
+            const { id } = req.body;
+            const query = ` 
+                UPDATE renderizador SET active = false
+                WHERE id = ?;
+            `;
+
+            const [result] = await dbConnection.promise().query(query, [id]);
+            res.status(200).json({
+                message: 'Renderizador removido!',
+                id: id,
+                result: result.affectedRows
+            });
+
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({
+                message: 'Erro ao deletar Renderizador',
+                error: error.message
+            });
+        }
+    }
+
+    // Login Renderizador
+    async login(req, res) {
+        try {
+            const { email, senha } = req.body;
+            const [rows] = await db.query(
+                'SELECT * FROM renderizador WHERE email = ?',
+                [email]
+            );
+
+            if (rows.length === 0) {
+                return res.status(401).json({
+                    message: 'Email ou Senha invalidos'
+                });
+            }
+
+            const renderizador = rows[0];
+            const validPassword = await bcrypt.compare(senha, renderizador.senha);
+
+            if (!validPassword) {
+                return res.status(401).json({
+                    message: 'Email ou Senha invalidos'
+                });
+            }
+
+            // Remove senha e active da resposta
+            delete renderizador.senha;
+            delete renderizador.active;
+
+            res.status(200).json({
+                message: 'Login realizado com Sucesso!',
+                renderizador
+            });
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({
+                message: 'Erro ao realizar login',
+                error: error.message
+            });
+        }
+    }
+
+};
+
+module.exports = new RenderizadorController();

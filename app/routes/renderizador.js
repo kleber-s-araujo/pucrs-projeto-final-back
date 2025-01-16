@@ -15,7 +15,30 @@ module.exports = app => {
     const { body } = require('express-validator');
     const router = new express.Router();
 
+    router.post('/', 
+        body('nome').not().isEmpty().escape(), 
+        body('email').isEmail().escape(),
+        body('senha').isStrongPassword().escape(),
+        body('fotoPerfil'),
+        body('descricao'), 
+        body('capacidade').not().isEmpty().escape(), 
+        controller.createRenderizador);
+    
+    router.get('/id/:id/:lang', controller.getRenderizadorById);
+    
     router.get('/:lang', controller.getAllRenderizadores);
+    
+    router.put('/id/:id',
+        body('nome').not().isEmpty().escape(), 
+        body('email').isEmail().escape(),
+        body('fotoPerfil'),
+        body('descricao'), 
+        body('capacidade').not().isEmpty().escape(), 
+        controller.updateRenderizador);
+
+    router.delete('/',
+        body('id').not().isEmpty().escape(),
+        controller.deleteRenderizador);
 
     //Export
     app.use('/api/renderizador', router);

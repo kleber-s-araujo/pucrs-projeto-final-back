@@ -68,6 +68,7 @@ CREATE TABLE cliente (
   tipo INT NOT NULL,
   dataRegistro TIMESTAMP,
   fotoPerfil VARCHAR(255) NOT NULL,
+  active BOOLEAN,
   PRIMARY KEY (id),
   FOREIGN KEY (tipo) REFERENCES tipoCliente(id) ON DELETE RESTRICT
 );
@@ -81,6 +82,7 @@ CREATE TABLE renderizador (
   descricao VARCHAR(2000),
   dataRegistro TIMESTAMP,
   capacidade INT,
+  active BOOLEAN,
   PRIMARY KEY (id),
   FOREIGN KEY (capacidade) REFERENCES capacidadeRenderizador(id) ON DELETE RESTRICT
 );
