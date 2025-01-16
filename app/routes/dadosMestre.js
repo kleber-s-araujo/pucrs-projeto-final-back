@@ -12,7 +12,7 @@ module.exports = app => {
 
     // Inicialização dos Objetos
     const express = require('express');
-    const controller = require('../controllers/dadosMestre');
+    const controller = require('../controllers/dadosMestreController');
     const { body } = require('express-validator');
     const router = new express.Router();
 

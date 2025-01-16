@@ -1,7 +1,7 @@
 /*
  * @Author: Kleber Araujo
  * @Email:  kleberslvaraujo@gmail.com
- * @Date:   2025-01-12
+ * @Date:   2025-01-15
  * @Description: Backend da Aplicação Desenvolvida para o curso de pós-graduação em Desenvolvimento FullStack - PUCRS
  * Este Desenvolvimento via receber requisições e processá-las acessando o Banco de Dados MySQL via Docker
  */
@@ -10,18 +10,18 @@ const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 const dbConnection = require('../models/db.js');
 
-class RenderizadorController {
+class ClienteController {
 
-    // Lista Todos os Renderizadores
-    async getAllRenderizadores(req, res) {
+    // Lista Todos os Clientes
+    async getAllClientes(req, res) {
         try {
             const query = `
-                SELECT r.*, c.descricao as capacidadeDescricao 
-                FROM renderizador r
-                JOIN capacidadeRenderizador c ON r.capacidade = c.id
-                WHERE c.lang = ?;
+                SELECT c.*, t.descricao as tipoClienteDesc 
+                FROM cliente c
+                JOIN tipoCliente t ON c.tipo = t.id
+                WHERE t.lang = ?;
             `;
-            const [rows] = await dbConnection.promise().query(query, [req.params.lang]);
+            const [rows] = await dbConnection.promise().query(query, req.params.lang);
 
             // Remove a senha da resposta
             const safeRows = rows.map(row => {
@@ -40,39 +40,46 @@ class RenderizadorController {
         }
     }
 
-    // Busca Renderizador pelo ID
-    async getRenderizadorById(req, res) {
+    
+    // Busca Cliente pelo ID
+    async getClienteById(req, res) {
         try {
             const { id, lang } = req.params;
             const query = `
-                SELECT r.*, c.descricao as capacidadeDescricao 
-                FROM renderizador r
-                JOIN capacidadeRenderizador c ON r.capacidade = c.id
-                WHERE r.id = ?
-                AND c.lang = ?
+                SELECT c.*, t.descricao as tipoClienteDesc 
+                FROM cliente c
+                JOIN tipoCliente t ON c.tipo = t.id
+                WHERE c.id = ?
+                AND t.lang = ?
             `;
 
             const [rows] = await dbConnection.promise().query(query, [id, lang]);
 
             if (rows.length === 0) {
                 return res.status(404).json({
-                    message: 'Renderizador não encontrado.'
+                    message: 'Cliente não encontrado.'
                 });
             }
 
-            res.status(200).json(rows[0]);
+            // Remove a senha da resposta
+            const safeRows = rows.map(row => {
+                const { senha, ...safeRow } = row;
+                return safeRow;
+            });
+            res.status(200).json(safeRows[0]);
 
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({
-                message: 'Erro ao buscar Renderizador',
+                message: 'Erro ao buscar Cliente',
                 error: error.message
             });
         }
     }
 
+    
     // Cria novo Renderizador
-    async createRenderizador(req, res) {
+    async createCliente(req, res) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -82,31 +89,36 @@ class RenderizadorController {
             const hashedSenha = await bcrypt.hash(req.body.senha, 10);
 
             const query = `
-                INSERT INTO renderizador 
-                (nome, email, senha, fotoPerfil, descricao, dataRegistro, capacidade)
-                VALUES (?, ?, ?, ?, ?, NOW(), ?);
+                INSERT INTO cliente 
+                (nome, email, senha, tipo, dataRegistro, fotoPerfil, active )
+                VALUES (?, ?, ?, ?, NOW(), ?, ?);
             `;
 
             const [result] = await dbConnection.promise().query(query,
-                [req.body.nome, req.body.email, hashedSenha, req.body.fotoPerfil || null, req.body.descricao || null, req.body.capacidade]);
+                [ req.body.nome, 
+                  req.body.email, 
+                  hashedSenha, 
+                  req.body.tipo,
+                  req.body.fotoPerfil || null, 
+                  true ]);
 
             res.status(201).json({
-                message: 'Renderizador criado com sucesso',
+                message: 'Cliente criado com sucesso!',
                 id: result.insertId
             });
 
         } catch (error) {
             console.error('Erro:', error);
             res.status(500).json({
-                message: 'Erro ao criar novo Renderizador',
+                message: 'Erro ao criar novo Cliente',
                 error: error.message
             });
         }
 
     }
 
-    //Atualiza Renderizador
-    async updateRenderizador(req, res) {
+    //Atualiza Cliente
+    async updateCliente(req, res) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -114,50 +126,50 @@ class RenderizadorController {
             }
 
             const { id } = req.params;
-            const { nome, email, senha, fotoPerfil, descricao, capacidade } = req.body;
+            const { nome, email, tipo, fotoPerfil } = req.body;
 
             const query = ` 
                 UPDATE renderizador
-                SET nome = ?, email = ?, fotoPerfil = ?, descricao = ?, capacidade = ?
+                SET nome = ?, email = ?, tipo = ?, fotoPerfil = ?
                 WHERE id = ?;
             `;
 
-            const params = [nome, email, fotoPerfil || null, descricao || null, capacidade];
+            const params = [nome, email, tipo, fotoPerfil || null, ativo ];
             params.push(id);
             const [result] = await dbConnection.promise().query(query, params);
 
             if (result.affectedRows === 0) {
                 return res.status(404).json({
-                    message: 'Renderizador não encontrado'
+                    message: 'Cliente não encontrado'
                 });
             }
 
             res.status(200).json({
-                message: 'Renderizador Atualizado com Sucesso!',
+                message: 'Cliente atualizado com Sucesso!',
                 result: result.affectedRows
             });
 
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({
-                message: 'Erro ao atualizar Renderizador',
+                message: 'Erro ao atualizar Cliente',
                 error: error.message
             });
         }
     }
 
-    //Desabilita Renderizador
-    async deleteRenderizador(req, res) {
+    //Desabilita Cliente
+    async deleteCliente(req, res) {
         try {
             const { id } = req.body;
             const query = ` 
-                UPDATE renderizador SET active = false
+                UPDATE cliente SET active = false
                 WHERE id = ?;
             `;
 
             const [result] = await dbConnection.promise().query(query, [id]);
             res.status(200).json({
-                message: 'Renderizador removido!',
+                message: 'Cliente removido!',
                 id: id,
                 result: result.affectedRows
             });
@@ -165,7 +177,7 @@ class RenderizadorController {
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({
-                message: 'Erro ao deletar Renderizador',
+                message: 'Erro ao deletar Cliente',
                 error: error.message
             });
         }
@@ -176,7 +188,7 @@ class RenderizadorController {
         try {
             const { email, senha } = req.body;
             const [rows] = await db.query(
-                'SELECT * FROM renderizador WHERE email = ?',
+                'SELECT * FROM cliente WHERE email = ?',
                 [email]
             );
 
@@ -211,7 +223,7 @@ class RenderizadorController {
             });
         }
     }
-
+    
 };
 
-module.exports = new RenderizadorController();
+module.exports = new ClienteController();

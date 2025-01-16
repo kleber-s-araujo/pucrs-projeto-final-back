@@ -1,7 +1,7 @@
 /*
  * @Author: Kleber Araujo
  * @Email:  kleberslvaraujo@gmail.com
- * @Date:   2025-01-15
+ * @Date:   2025-01-12
  * @Description: Backend da Aplicação Desenvolvida para o curso de pós-graduação em Desenvolvimento FullStack - PUCRS
  * Este Desenvolvimento via receber requisições e processá-las acessando o Banco de Dados MySQL via Docker
  */
@@ -10,18 +10,18 @@ const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 const dbConnection = require('../models/db.js');
 
-class ClienteController {
+class RenderizadorController {
 
-    // Lista Todos os Clientes
-    async getAllClientes(req, res) {
+    // Lista Todos os Renderizadores
+    async getAllRenderizadores(req, res) {
         try {
             const query = `
-                SELECT c.*, t.descricao as tipoClienteDesc 
-                FROM cliente c
-                JOIN tipoCliente t ON c.tipo = t.id
-                WHERE t.lang = ?;
+                SELECT r.*, c.descricao as capacidadeDescricao 
+                FROM renderizador r
+                JOIN capacidadeRenderizador c ON r.capacidade = c.id
+                WHERE c.lang = ?;
             `;
-            const [rows] = await dbConnection.promise().query(query, req.params.lang);
+            const [rows] = await dbConnection.promise().query(query, [req.params.lang]);
 
             // Remove a senha da resposta
             const safeRows = rows.map(row => {
@@ -40,7 +40,6 @@ class ClienteController {
         }
     }
 
-    /*
     // Busca Renderizador pelo ID
     async getRenderizadorById(req, res) {
         try {
@@ -61,7 +60,12 @@ class ClienteController {
                 });
             }
 
-            res.status(200).json(rows[0]);
+            // Remove a senha da resposta
+            const safeRows = rows.map(row => {
+                const { senha, ...safeRow } = row;
+                return safeRow;
+            });
+            res.status(200).json(safeRows[0]);
 
         } catch (error) {
             console.error('Error:', error);
@@ -212,7 +216,7 @@ class ClienteController {
             });
         }
     }
-    */
+
 };
 
-module.exports = new ClienteController();
+module.exports = new RenderizadorController();

@@ -9,7 +9,7 @@ module.exports = app => {
 
     // Inicialização dos Objetos
     const express = require('express');
-    const controller = require('../controllers/renderizador');
+    const controller = require('../controllers/renderizadorController');
     const { body } = require('express-validator');
     const router = new express.Router();
 

@@ -9,11 +9,32 @@ module.exports = app => {
 
     // Inicialização dos Objetos
     const express = require('express');
-    const controller = require('../controllers/cliente');
+    const controller = require('../controllers/clienteController');
     const { body } = require('express-validator');
     const router = new express.Router();
 
+    router.post('/', 
+        body('nome').not().isEmpty().escape(), 
+        body('email').isEmail().escape(),
+        body('senha').isStrongPassword().escape(),
+        body('fotoPerfil'),
+        body('tipo').not().isEmpty().escape(),
+        controller.createCliente);
+    
+    router.get('/id/:id/:lang', controller.getClienteById);
+    
     router.get('/:lang', controller.getAllClientes);
+    
+    router.put('/id/:id',
+        body('nome').not().isEmpty().escape(), 
+        body('email').isEmail().escape(),
+        body('tipo').not().isEmpty().escape(), 
+        body('fotoPerfil'),       
+        controller.updateCliente);
+
+    router.delete('/',
+        body('id').not().isEmpty().escape(),
+        controller.deleteCliente);
 
     //Export
     app.use('/api/cliente', router);
