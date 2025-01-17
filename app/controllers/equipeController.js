@@ -42,11 +42,12 @@ class EquipeController {
 
         try {
 
-            const { id } = req.params;
+            const { id, lang } = req.params;
 
             const query = `
                 SELECT e.*, c.idCliente as userId, c.roleCliente as role, 'Clientes' as tipoEquipe
                 INNER JOIN equipeCliente as c ON e.id = c.idEquipe AND c.roleCliente = '3'
+                WHERE e.id = ?
                 UNION
                 SELECT e.*, r.idRenderizador as userId, r.roleRenderizador as role, 'Renderizadores' as tipoEquipe
                 INNER JOIN equipeRenderizador as r ON e.id = c.idEquipe AND c.roleCliente = '3
@@ -54,7 +55,7 @@ class EquipeController {
                 ORDER by id;
             `;
 
-            var rows = dbConnection.promise().query(query, id);
+            var rows = dbConnection.promise().query(query, [id,id]);
 
             if (rows.length === 0) {
                 return res.status(404).json({ error: 'Equipe não encontrada!' });
@@ -71,15 +72,14 @@ class EquipeController {
 
     // Altera o Nome da Equipe
     async updateNomeEquipe(req, res) {
+        
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }
 
-            const { id } = req.params;
-            const { nome } = req.body;
-
+            const { id, nome } = req.body;
             const query = ` 
                 UPDATE equipe SET nome = ?
                 WHERE id = ?;

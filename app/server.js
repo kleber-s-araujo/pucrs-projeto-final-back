@@ -9,8 +9,8 @@
  */
 
 const express = require('express');
-const cors    = require('cors');
-const app     = express();
+const cors = require('cors');
+const app = express();
 
 var corsOptions = {
   origin: "http://localhost:8081"
@@ -26,9 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rota Master
 app.get("/", (req, res) => {
-  
   res.json({ message: "Bem Vindo ao Backend!", dbstatus: `DB ${db.state}.` });
-
 });
 
 // DB Connection Init
@@ -38,6 +36,7 @@ const db = require("./models/db.js");
 require("./routes/dadosMestre.js")(app);
 require("./routes/renderizador.js")(app);
 require("./routes/cliente.js")(app);
+require("./routes/equipe.js")(app);
 //require("./routes/statuscheck.js")(app);
 
 // set port, listen for requests
