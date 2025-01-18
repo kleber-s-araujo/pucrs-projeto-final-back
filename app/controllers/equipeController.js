@@ -118,6 +118,7 @@ class EquipeController {
                 return res.status(400).json({ errors: errors.array() });
             }
 
+            const { nome, idCliente } = req.body;
             const query = `
                 INSERT INTO equipe (nome)
                 VALUES (?);
@@ -125,10 +126,7 @@ class EquipeController {
                 VALUES ( LAST_INSERT_ID(), ?, ? );
             `;
 
-            const [result] = await dbConnection.promise().query(query,
-                [req.body.nome,
-                req.body.idCliente,
-                    '3']);
+            const [result] = await dbConnection.promise().query(query, [ nome, idCliente, '3']);
             
             if (result.affectedRows === 0) {
                 return res.status(404).json({
@@ -159,6 +157,7 @@ class EquipeController {
                 return res.status(400).json({ errors: errors.array() });
             }
 
+            const { nome, idRenderizador } = req.body;
             const query = `
                 INSERT INTO equipe (nome)
                 VALUES (?);
@@ -166,10 +165,7 @@ class EquipeController {
                 VALUES ( LAST_INSERT_ID(), ?, ? );
             `;
 
-            const [result] = await dbConnection.promise().query(query,
-                [req.body.nome,
-                req.body.idRenderizador,
-                    '3']);
+            const [result] = await dbConnection.promise().query(query, [ nome, idRenderizador, '3']);
 
             res.status(201).json({
                 message: 'Equipe criada com sucesso!',
@@ -186,7 +182,7 @@ class EquipeController {
     }
 
     // Adiciona Cliente
-    async removeCliente(req, res) {
+    async addCliente(req, res) {
 
         try {
 
@@ -195,7 +191,8 @@ class EquipeController {
                 return res.status(400).json({ errors: errors.array() });
             }
 
-            const { idEquipe, idCliente, roleCliente } = req.body;
+            const idEquipe = req.params;
+            const { idCliente, roleCliente } = req.body;
             const query = `
                 INSERT INTO equipeCliente (idEquipe, idCliente, roleCliente) VALUES (?, ?, ?);
             `;
@@ -224,7 +221,7 @@ class EquipeController {
     }
 
     // Adiciona Renderizador
-    async removeRenderizador(req, res) {
+    async addRenderizador(req, res) {
 
         try {
 
@@ -233,7 +230,8 @@ class EquipeController {
                 return res.status(400).json({ errors: errors.array() });
             }
 
-            const { idEquipe, idRenderizador, roleRenderizador } = req.body;
+            const idEquipe = req.params;
+            const { idRenderizador, roleRenderizador } = req.body;
             const query = `
                 INSERT INTO equipeCliente (idEquipe, idCliente, roleCliente) VALUES (?, ?, ?);
             `;
@@ -271,13 +269,13 @@ class EquipeController {
                 return res.status(400).json({ errors: errors.array() });
             }
 
-            const { id } = req.body;
+            const idEquipe = req.params;
+            const { idCliente } = req.body;
             const query = `
-                DELETE equipeCliente
-                WHERE idCliente = ?;
+                DELETE equipeCliente WHERE idEquipe = ? AND idCliente = ?;
             `;
 
-            const [result] = await dbConnection.promise().query(query, id);
+            const [result] = await dbConnection.promise().query(query, { idEquipe, idCliente });
             res.status(200).json({
                 message: 'Cliente removido!',
                 id: id,
