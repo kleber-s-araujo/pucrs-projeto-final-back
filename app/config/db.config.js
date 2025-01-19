@@ -9,7 +9,7 @@
  */
 
 module.exports = {
-    HOST: "localhost",
+    HOST: "172.20.0.2",
     PORT: 3306,
     USER: "root",
     PASSWORD: "123456",

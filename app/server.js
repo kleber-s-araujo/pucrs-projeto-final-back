@@ -13,7 +13,8 @@ const cors = require('cors');
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:8081"
+  //origin: "http://localhost:8081"
+  origin: "http://127.0.0.1:3030"
 };
 
 app.use(cors(corsOptions));
@@ -26,11 +27,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rota Master
 app.get("/", (req, res) => {
-  res.json({ message: "Bem Vindo ao Backend!", dbstatus: `DB ${db.state}.` });
+  res.json({ message: "Bem Vindo ao Backend!" }); //"dbstatus: `DB ${db.state}.` });
 });
 
 // DB Connection Init
-const db = require("./models/db.js");
+//const db = require("./models/db.js");
 
 // Rotas da Aplicação
 require("./routes/dadosMestre.js")(app);
@@ -40,7 +41,8 @@ require("./routes/equipe.js")(app);
 //require("./routes/statuscheck.js")(app);
 
 // set port, listen for requests
-const PORT = process.env.PORT || 8080;
+//const PORT = process.env.PORT || 3030;
+const PORT = 3030;
 app.listen(PORT, () => {
   console.log(`Server executando na porta ${PORT}.`);
 });

@@ -62,16 +62,27 @@ class RequisicaoController {
         } catch (error) {
             res.status(500).json({ error: 'Erro ao criar Requisição' });
         }
-
-
     }
 
     async getAll(req, res) {
         try {
 
             const query = `
+                SELECT * FROM requisicaoRender;`
+            const [rows] = await dbConnection.promise().query(query);
+            res.json(rows);
+
+        } catch (error) {
+            res.status(500).json({ error: 'Erro ao buscar requisições' });
+        }
+    }
+
+    async getRequisicoesAbertas(req, res) {
+        try {
+
+            const query = `
                 SELECT * FROM requisicaoRender
-                WHERE id = ?;`
+                WHERE status = '1';`
             const [rows] = await dbConnection.promise().query(query);
             res.json(rows);
 
@@ -94,7 +105,7 @@ class RequisicaoController {
             }
 
             res.json({
-                requisicaoRender: { requisicao, renderConfig: renderConfig }
+                requisicao, renderConfig: renderConfig 
             });
 
         } catch (error) {
@@ -102,7 +113,204 @@ class RequisicaoController {
         }
     }
 
+    async getRequisicaoPorEquipe(req, res) {
 
+        try {
+            
+            const { id } = req.params;
+            const query = `
+                SELECT DISTINCT
+                    requisicaoRender.id,
+                    requisicaoRender.titulo,
+                    requisicaoRender.descricao,
+                    requisicaoRender.dataRegistro,
+                    requisicaoRender.status,
+                    requisicaoRender.prioridade,
+                    renderConfig.tipoProjeto,
+                    cliente.nome as cliente,
+                    renderizador.nome as renderizador
+                FROM 
+                    requisicaoRender
+                    LEFT JOIN renderConfig ON renderConfig.id = requisicaoRender.id
+                    LEFT JOIN requisicaoCliente reqc ON reqc.idRequisicao = requisicaoRender.id
+                    LEFT JOIN requisicaoRenderizador reqr ON reqr.idRequisicao = requisicaoRender.id
+                    LEFT JOIN cliente ON cliente.id = reqc.idCliente
+                    LEFT JOIN renderizador ON renderizador.id = reqr.idRenderizador
+                    LEFT JOIN equipeCliente ec ON ec.idCliente = cliente.id
+                    LEFT JOIN equipeRenderizador er ON er.idRenderizador = renderizador.id
+                WHERE 
+                    ec.idEquipe = ? OR er.idEquipe = ?
+                ORDER BY rr.dataRegistro DESC; `;
+
+            const [result] = await dbConnection.promise.query(query, [id, id]);
+
+            if (result.length === 0) {
+                return res.status(404).json({ error: 'Sem Requisições para a Equipe' });
+            }
+
+            res.json(result);
+
+        } catch (error) {
+            res.status(500).json({ error: 'Erro ao buscar requisições da equipe' });
+        }
+    }
+
+    async getRequisicaoPorCliente(req, res) {
+
+        try {
+            
+            const { id } = req.params;
+            const query = `
+                SELECT 
+                    rr.id,
+                    rr.titulo,
+                    rr.descricao,
+                    DATE_FORMAT(rr.dataRegistro, '%d/%m/%Y %H:%i') as data_registro,
+                    ts.descricao as status,
+                    tp.descricao as prioridade,
+                    pr.descricao as pacote,
+                    rc.tipoProjeto,
+                    rc.m2Interno,
+                    rc.m2Edificação,
+                    rc.m2Terreno,
+                    rc.proporcao,
+                    rc.ambientes,
+                    rc.servicosAdicionais,
+                    rc.iluminacoes,
+                    r.nome as renderizador
+                FROM 
+                    requisicaoRender rr
+                    INNER JOIN requisicaoCliente rc_link ON rc_link.idRequisicao = rr.id
+                    LEFT JOIN renderConfig rc ON rc.id = rr.id
+                    LEFT JOIN tipoStatus ts ON ts.id = rr.status
+                    LEFT JOIN tipoPrioridade tp ON tp.id = rr.prioridade
+                    LEFT JOIN pacoteRender pr ON pr.id = rr.pacote
+                    LEFT JOIN requisicaoRenderizador rr_link ON rr_link.idRequisicao = rr.id
+                    LEFT JOIN renderizador r ON r.id = rr_link.idRenderizador
+                WHERE 
+                    rc_link.idCliente = ?
+                ORDER BY 
+                    rr.dataRegistro DESC; `;
+
+            const [result] = await dbConnection.promise.query(query, [id]);
+
+            if (result.length === 0) {
+                return res.status(404).json({ error: 'Sem Requisições para o Cliente' });
+            }
+
+            res.json(result);
+
+        } catch (error) {
+            res.status(500).json({ error: 'Erro ao buscar requisições por Cliente' });
+        }
+         
+    }
+
+    async getRequisicaoPorCliente(req, res) {
+
+        try {
+            
+            const { id } = req.params;
+            const query = `
+                SELECT 
+                    rr.id,
+                    rr.titulo,
+                    rr.descricao,
+                    DATE_FORMAT(rr.dataRegistro, '%d/%m/%Y %H:%i') as data_registro,
+                    ts.descricao as status,
+                    tp.descricao as prioridade,
+                    pr.descricao as pacote,
+                    rc.tipoProjeto,
+                    rc.m2Interno,
+                    rc.m2Edificação,
+                    rc.m2Terreno,
+                    rc.proporcao,
+                    rc.ambientes,
+                    rc.servicosAdicionais,
+                    rc.iluminacoes,
+                    c.nome as cliente,
+                    c.email as cliente_email
+                FROM 
+                    requisicaoRender rr
+                    INNER JOIN requisicaoRenderizador rr_link ON rr_link.idRequisicao = rr.id
+                    LEFT JOIN renderConfig rc ON rc.id = rr.id
+                    LEFT JOIN tipoStatus ts ON ts.id = rr.status
+                    LEFT JOIN tipoPrioridade tp ON tp.id = rr.prioridade
+                    LEFT JOIN pacoteRender pr ON pr.id = rr.pacote
+                    LEFT JOIN requisicaoCliente rc_link ON rc_link.idRequisicao = rr.id
+                    LEFT JOIN cliente c ON c.id = rc_link.idCliente
+                WHERE 
+                    rr_link.idRenderizador = ?
+                ORDER BY 
+                    rr.dataRegistro DESC; `;
+
+            const [result] = await dbConnection.promise.query(query, [id, id]);
+
+            if (result.length === 0) {
+                return res.status(404).json({ error: 'Sem Requisições para a Equipe' });
+            }
+
+            res.json(result);
+
+        } catch (error) {
+            res.status(500).json({ error: 'Erro ao buscar requisições da equipe' });
+        }
+         
+    }
+
+    async atualizaStatus(req, res) {
+
+        try {
+            
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            const { idRequisicao, novoStatus } = req.body;
+
+            const query = `
+                UPDATE requisicaoRender 
+                SET status = ?
+                WHERE id = ?;
+            `;
+
+            const result = await dbConnection.promise().query(query, { idRequisicao, novoStatus });
+            if (result.affectedRows === 0) {
+                return res.status(404).json({
+                    message: 'Requisição não atualizada'
+                });
+            }
+
+            res.status(200).json({
+                message: 'Requisição atualizada!',
+                result: result.affectedRows
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro ao atualizar Requisição',
+                error: error.message
+            });
+        }
+    }
+
+    async atribuiAoRenderizador(req, res) {
+            
+        try {
+            
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            
+
+        } catch (error) {
+            
+        }
+        
+    }
 }
 
 module.exports = new RequisicaoController();
