@@ -9,8 +9,13 @@
 const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 const dbConnection = require('../models/db.js');
+const crypto = require('crypto');
 
 class RenderizadorController {
+
+    constructor(session) {
+        this.session = session;
+    }
 
     // Lista Todos os Renderizadores
     async getAllRenderizadores(req, res) {
@@ -179,8 +184,11 @@ class RenderizadorController {
     // Login Renderizador
     async login(req, res) {
         try {
+
+            console.log(req);
+
             const { email, senha } = req.body;
-            const [rows] = await db.query(
+            const [rows] = await dbConnection.promise().query(
                 'SELECT * FROM renderizador WHERE email = ?',
                 [email]
             );
@@ -204,10 +212,22 @@ class RenderizadorController {
             delete renderizador.senha;
             delete renderizador.active;
 
+            if(renderizador)
+            {
+                const secret = crypto.randomBytes(32).toString('hex');
+                req.session.isAuthenticated = true;
+                req.session.secret = secret;
+                req.session.email  = renderizador.email;
+
+                console.log(req.session);
+            }
+
             res.status(200).json({
                 message: 'Login realizado com Sucesso!',
-                renderizador
+                renderizador,
+                session: req.session
             });
+
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({

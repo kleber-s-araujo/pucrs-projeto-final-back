@@ -12,6 +12,19 @@ module.exports = app => {
     const controller = require('../controllers/renderizadorController');
     const { body } = require('express-validator');
     const router = new express.Router();
+    const session = require('express-session');
+
+    app.use(express.json()); // For parsing JSON payloads
+    app.use(express.urlencoded({ extended: true })); // For parsing form data
+    app.use(session({
+        secret: 'secret-key',
+        resave: false,
+        saveUninitialized: false,
+        cookie: { 
+            secure: false, // Setar para true se for usar HTTPS
+            maxAge: 1000 * 60 * 60 // 1 hora
+        }
+    }));
 
     router.post('/', 
         body('nome').not().isEmpty().escape(), 
@@ -37,6 +50,15 @@ module.exports = app => {
     router.delete('/',
         body('id').not().isEmpty().escape(),
         controller.deleteRenderizador);
+
+    router.post('/login',
+        controller.login
+    )
+
+    app.get('/logout', (req, res) => {
+        req.session.destroy();
+        res.redirect('/auth/signin');
+    });
 
     //Export
     app.use('/api/renderizador', router);

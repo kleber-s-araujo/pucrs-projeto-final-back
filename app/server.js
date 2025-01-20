@@ -13,11 +13,34 @@ const cors = require('cors');
 const app = express();
 
 var corsOptions = {
-  //origin: "http://localhost:8081"
-  origin: "http://127.0.0.1:3030"
+  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+  credentials: true,  // if you're sending cookies or authentication headers
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "application/json"]
 };
 
 app.use(cors(corsOptions));
+
+app.use(cors((req, callback) => {
+  const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+  const origin = req.header('Origin');
+  let corsOptions;
+  
+  if (allowedOrigins.includes(origin)) {
+    corsOptions = {
+      origin: true,
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "application/json"]
+    };
+  } else {
+    corsOptions = {
+      origin: false
+    };
+  }
+  
+  callback(null, corsOptions);
+}));
 
 // Parse das Requisições do tipo "application/json"
 app.use(express.json());
