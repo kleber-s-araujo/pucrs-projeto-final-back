@@ -9,22 +9,22 @@ module.exports = app => {
 
     // Inicialização dos Objetos
     const express = require('express');
-    const controller = require('../controllers/renderizadorController');
     const { body } = require('express-validator');
-    const router = new express.Router();
     const session = require('express-session');
+    const router = new express.Router();
+    const controller = require('../controllers/renderizadorController');
 
     app.use(express.json()); // For parsing JSON payloads
     app.use(express.urlencoded({ extended: true })); // For parsing form data
-    app.use(session({
-        secret: 'secret-key',
-        resave: false,
-        saveUninitialized: false,
-        cookie: { 
-            secure: false, // Setar para true se for usar HTTPS
-            maxAge: 1000 * 60 * 60 // 1 hora
-        }
+
+    app.use(session({ 
+        secret: 'secret', 
+        resave: false, 
+        saveUninitialized: true, 
+        cookie: { secure: false } // Use true in a production environment with HTTPS 
     }));
+
+    router.get('/session', controller.testSession);
 
     router.post('/', 
         body('nome').not().isEmpty().escape(), 
@@ -53,12 +53,14 @@ module.exports = app => {
 
     router.post('/login',
         controller.login
-    )
+    );
 
     app.get('/logout', (req, res) => {
         req.session.destroy();
         res.redirect('/auth/signin');
     });
+
+    
 
     //Export
     app.use('/api/renderizador', router);

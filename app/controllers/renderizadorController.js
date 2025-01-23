@@ -13,10 +13,6 @@ const crypto = require('crypto');
 
 class RenderizadorController {
 
-    constructor(session) {
-        this.session = session;
-    }
-
     // Lista Todos os Renderizadores
     async getAllRenderizadores(req, res) {
         try {
@@ -181,12 +177,34 @@ class RenderizadorController {
         }
     }
 
+    //Test session
+    async testSession(req, res) {
+
+        try {
+            
+            console.log("Chegou no teste");  
+            //console.log(req);
+            console.log("req", req.session);
+
+            let resTime = req.session.cookie.expires - new Date();
+            console.log("falta", resTime);
+
+            res.status(201).json({
+                message: 'Retorno da Sessão',
+                session: this.session,
+                falta: resTime
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Sem Sessão!'
+            });
+        }
+    }
+
     // Login Renderizador
     async login(req, res) {
         try {
-
-            console.log(req);
-
             const { email, senha } = req.body;
             const [rows] = await dbConnection.promise().query(
                 'SELECT * FROM renderizador WHERE email = ?',
@@ -218,8 +236,6 @@ class RenderizadorController {
                 req.session.isAuthenticated = true;
                 req.session.secret = secret;
                 req.session.email  = renderizador.email;
-
-                console.log(req.session);
             }
 
             res.status(200).json({
@@ -229,7 +245,6 @@ class RenderizadorController {
             });
 
         } catch (error) {
-            console.error('Error:', error);
             res.status(500).json({
                 message: 'Erro ao realizar login',
                 error: error.message
