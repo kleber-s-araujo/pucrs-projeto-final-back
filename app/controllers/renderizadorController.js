@@ -89,12 +89,12 @@ class RenderizadorController {
 
             const query = `
                 INSERT INTO renderizador 
-                (nome, email, senha, fotoPerfil, descricao, dataRegistro, capacidade)
-                VALUES (?, ?, ?, ?, ?, NOW(), ?);
+                (nome, email, senha, dataRegistro)
+                VALUES (?, ?, ?, NOW());
             `;
 
             const [result] = await dbConnection.promise().query(query,
-                [req.body.nome, req.body.email, hashedSenha, req.body.fotoPerfil || null, req.body.descricao || null, req.body.capacidade]);
+                [req.body.nome, req.body.email, hashedSenha ]);
 
             res.status(201).json({
                 message: 'Renderizador criado com sucesso',

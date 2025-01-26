@@ -95,21 +95,21 @@ class RequisicaoController {
         try {
 
             const { id } = req.params;
-            const query = `SELECT * FROM requisicaoRender WHERE id = ?`;
-            const [requisicao] = await dbConnection.promise.query(query, [id]);
-            query = `SELECT * FROM renderConfig WHERE id = ?`;
-            const [renderConfig] = await dbConnection.promise.query(query, [id]);
+            let query = `SELECT * FROM requisicaoRender WHERE id = ?;`;
+            const [requisicao] = await dbConnection.promise().query(query, id);
 
-            if (rows.length === 0) {
+            query = `SELECT * FROM renderConfig WHERE id = ?;`;
+            const [renderConfig] = await dbConnection.promise().query(query, id);
+
+            if (requisicao.length === 0) {
                 return res.status(404).json({ error: 'Requisição não encontrada' });
             }
 
-            res.json({
-                requisicao, renderConfig: renderConfig 
-            });
+            Object.assign(requisicao[0], { renderConfig: renderConfig[0] });
+            res.json(requisicao[0]);
 
-        } catch (error) {
-            res.status(500).json({ error: 'Erro ao buscar requisição' });
+        } catch (error) {            
+            res.status(500).json({ error: 'Erro ao buscar requisição', error });
         }
     }
 

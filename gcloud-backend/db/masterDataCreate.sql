@@ -1,3 +1,5 @@
+use renderizaidb;
+
 INSERT INTO tipoCliente
 VALUES
     (1, "pt", "Arquiteto(a)"),
@@ -36,15 +38,15 @@ VALUES
 
 INSERT INTO tipoPrioridade
 VALUES
-    (1, "pt", "Baixa"),
-    (1, "en", "Low"),
-    (1, "es", "Bajo"),
-    (2, "pt", "Média"),
-    (2, "en", "Medium"),
-    (2, "es", "Media"),
-    (3, "pt", "Alta"),
-    (3, "en", "High"),
-    (3, "es", "Alta");
+    (1, "pt", "Baixa", 15),
+    (1, "en", "Low", 15),
+    (1, "es", "Bajo", 15),
+    (2, "pt", "Média", 7),
+    (2, "en", "Medium", 7),
+    (2, "es", "Media", 7),
+    (3, "pt", "Alta", 7),
+    (3, "en", "High", 7),
+    (3, "es", "Alta", 7);
 
 INSERT INTO tipoStatus
 VALUES

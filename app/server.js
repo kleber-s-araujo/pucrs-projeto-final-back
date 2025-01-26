@@ -20,7 +20,7 @@ var corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization", "application/json"]
 };
 
-app.use(cors({
+app.use(cors({  
   origin: function (origin, callback) {
     const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
     if (!origin || allowedOrigins.includes(origin)) {
@@ -46,14 +46,13 @@ app.get("/", (req, res) => {
   res.json({ message: "Bem Vindo ao Backend!" }); //"dbstatus: `DB ${db.state}.` });
 });
 
-// DB Connection Init
-//const db = require("./models/db.js");
-
 // Rotas da Aplicação
 require("./routes/dadosMestre.js")(app);
 require("./routes/renderizador.js")(app);
 require("./routes/cliente.js")(app);
 require("./routes/equipe.js")(app);
+require("./routes/requisicao.js")(app);
+require("./routes/dashboard.js")(app);
 //require("./routes/statuscheck.js")(app);
 
 // set port, listen for requests

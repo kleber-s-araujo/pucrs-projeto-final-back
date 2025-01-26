@@ -13,6 +13,8 @@
 #                     Master Data Tables                    #
 #############################################################
 
+USE renderizaidb;
+
 CREATE TABLE tipoCliente (
   id INT,
   lang VARCHAR(2),
@@ -38,6 +40,7 @@ CREATE TABLE tipoPrioridade (
   id INT,
   lang VARCHAR(2),
   descricao VARCHAR(30),
+  dias INT,
   PRIMARY KEY (id, lang)
 );
 
@@ -122,6 +125,7 @@ CREATE TABLE requisicaoRender (
   prioridade INT,
   status INT,
   isProjetoGrande BOOLEAN,
+  valor decimal(15, 2),
   PRIMARY KEY (id),
   FOREIGN KEY (pacote) REFERENCES pacoteRender(id) ON DELETE RESTRICT,
   FOREIGN KEY (prioridade) REFERENCES tipoPrioridade(id) ON DELETE RESTRICT,
@@ -132,7 +136,7 @@ CREATE TABLE renderConfig (
   id INT,
   tipoProjeto VARCHAR(50) NOT NULL,
   m2Interno INT,
-  m2Edificação INT,
+  m2Edificacao INT,
   m2Terreno INT,
   proporcao VARCHAR(50),
   ambientes VARCHAR(500),
@@ -220,3 +224,9 @@ CREATE TABLE arquivoSolicitacao (
   FOREIGN KEY (idArquivo) REFERENCES arquivo(id) ON DELETE RESTRICT,
   FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE RESTRICT
 );
+
+<-- use renderizaidb; -->
+<-- SELECT * FROM tipoPrioridade; -->
+<-- ALTER TABLE tipoPrioridade ADD COLUMN dias INT; -->
+<-- UPDATE tipoPrioridade SET dias = 15 WHERE id = 1; -->
+
