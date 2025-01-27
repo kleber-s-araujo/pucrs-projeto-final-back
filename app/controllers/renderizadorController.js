@@ -120,15 +120,20 @@ class RenderizadorController {
             }
 
             const { id } = req.params;
-            const { nome, email, senha, fotoPerfil, descricao, capacidade } = req.body;
+            const { nome, titulo, descricao, capacidade, localidade, site } = req.body;
 
             const query = ` 
-                UPDATE renderizador
-                SET nome = ?, email = ?, fotoPerfil = ?, descricao = ?, capacidade = ?
+                UPDATE renderizador SET 
+                nome = ?, 
+                titulo = ?, 
+                descricao = ?, 
+                capacidade = ?,
+                localidade = ?,
+                site = ?
                 WHERE id = ?;
             `;
 
-            const params = [nome, email, fotoPerfil || null, descricao || null, capacidade];
+            const params = [nome, titulo, descricao, capacidade, localidade, site];
             params.push(id);
             const [result] = await dbConnection.promise().query(query, params);
 

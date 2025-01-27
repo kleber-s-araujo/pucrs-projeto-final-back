@@ -37,9 +37,9 @@ module.exports = app => {
     router.get('/pacote/lang/:lang', controller.getPacotesByLang);
 
     // ---> Rotas Capacidade Renderizador
-    router.get('/capacidade/', controller.getAllPacotes);
-    router.get('/capacidade/id/:id/lang/:lang', controller.getPacoteById);
-    router.get('/capacidade/lang/:lang', controller.getPacotesByLang);
+    router.get('/capacidade/', controller.getAllCapacidade);
+    router.get('/capacidade/id/:id/lang/:lang', controller.getCapacidadeById);
+    router.get('/capacidade/lang/:lang', controller.getCapacidadeByLang);
 
     // ---> Rotas Prioridade
     router.get('/prioridade/', controller.getAllPrioridades);

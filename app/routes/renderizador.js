@@ -38,10 +38,11 @@ module.exports = app => {
     
     router.put('/id/:id',
         body('nome').not().isEmpty().escape(), 
-        body('email').isEmail().escape(),
-        body('fotoPerfil'),
+        body('titulo').not().isEmpty().escape(), 
         body('descricao'), 
         body('capacidade').not().isEmpty().escape(), 
+        body('localidade'), 
+        body('site'), 
         controller.updateRenderizador);
 
     router.delete('/',

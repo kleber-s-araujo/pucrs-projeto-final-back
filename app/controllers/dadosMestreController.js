@@ -238,14 +238,14 @@ const getCapacidadeByLang = async (req, res) => {
 
     try {
 
-        const query = 'SELECT * FROM pacoteRender WHERE lang = ?';
+        const query = 'SELECT * FROM capacidadeRenderizador WHERE lang = ?';
         dbConnection.query(query, [req.params.lang], (err, result) => {
             if (err) throw err;
             res.json({ 'capacidades': result });
         });
 
     } catch (error) {
-        console.error('Error reading pacoteRender:', error);
+        console.error('Error reading capacidades:', error);
         throw error;
     }
 };

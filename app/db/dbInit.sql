@@ -230,3 +230,9 @@ CREATE TABLE arquivoSolicitacao (
 <-- ALTER TABLE tipoPrioridade ADD COLUMN dias INT; -->
 <-- UPDATE tipoPrioridade SET dias = 15 WHERE id = 1; -->
 
+<-- use renderizaidb; -->
+<-- alter table renderizador  -->
+<--  ADD COLUMN titulo VARCHAR(40), --> 
+<--  ADD COLUMN localidade VARCHAR(100), -->
+<--  ADD COLUMN site VARCHAR(255); -->
+
