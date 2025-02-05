@@ -73,7 +73,7 @@ CREATE TABLE cliente (
   fotoPerfil VARCHAR(255) NOT NULL,
   active BOOLEAN,
   PRIMARY KEY (id),
-  FOREIGN KEY (tipo) REFERENCES tipoCliente(id) ON DELETE RESTRICT
+  FOREIGN KEY (tipo) REFERENCES tipoCliente(id)
 );
 
 CREATE TABLE renderizador (
@@ -87,8 +87,17 @@ CREATE TABLE renderizador (
   capacidade INT,
   active BOOLEAN,
   PRIMARY KEY (id),
-  FOREIGN KEY (capacidade) REFERENCES capacidadeRenderizador(id) ON DELETE RESTRICT
+  FOREIGN KEY (capacidade) REFERENCES capacidadeRenderizador(id)
 );
+
+use renderizaidb;
+ALTER TABLE cliente
+DROP FOREIGN KEY tipo;
+ALTER TABLE cliente
+ADD CONSTRAINT tipo
+FOREIGN KEY (tipo)
+REFERENCES tipoCliente(id);
+
 
 CREATE TABLE equipe (
   id INT AUTO_INCREMENT,
@@ -232,7 +241,6 @@ CREATE TABLE arquivoSolicitacao (
 
 <-- use renderizaidb; -->
 <-- alter table renderizador  -->
-<--  ADD COLUMN titulo VARCHAR(40), --> 
+<--  ADD COLUMN titulo VARCHAR(100), --> 
 <--  ADD COLUMN localidade VARCHAR(100), -->
 <--  ADD COLUMN site VARCHAR(255); -->
-
