@@ -10,7 +10,6 @@ const { validationResult } = require('express-validator');
 const dbConnection = require('../models/db.js');
 const { Storage } = require('@google-cloud/storage');
 
-
 const storage = new Storage({
     keyFilename: './acc_keys/vertical-set-449223-s3-4ac4029eb1e4.json',
     projectId: 'vertical-set-449223-s3'
@@ -18,45 +17,80 @@ const storage = new Storage({
 const bucketName = 'renderizai-portifolio';
 const bucket = storage.bucket(bucketName);
 
+async function generateSignedUrl(fileName) {
+
+    try {
+
+        const file = bucket.file(fileName);
+
+        // Configurações da URL assinada
+        const options = {
+            version: 'v4',
+            action: 'read',
+            expires: Date.now() + 60 * 60 * 1000, // URL válida por 60 minutos
+        };
+
+        // Gera a URL assinada
+        const [url] = await file.getSignedUrl(options);
+        return url;
+
+    } catch (error) {
+        console.error('Erro ao gerar URL assinada:', error);
+        throw error;
+    }
+};
+
 class ImageController {
     
     async postImage(req, res) {
-        
-        if (!req.file) {
-            return res.status(400).json({ message: 'Nenhum Arquivo enviado!' });
-        }
 
-        // Cria um identificador único para a Imagem
-        const filename = `${Date.now()}-${req.file.originalname}`;
+        try {
 
-        // Cria o stream para upar a imagem
-        const blob = bucket.file(filename);
-        const blobStream = blob.createWriteStream({
-            resumable: false,
-            metadata: {
-                contentType: req.file.mimetype
+            if (!req.file) {
+                return res.status(400).json({ message: 'Nenhum Arquivo enviado!' });
             }
-        });
 
-        blobStream.on('error', (error) => {
-            res.status(500).json({ message: 'Erro ao Subir a Imagem no Google Cloud Storage', error: error.message });
-        });
+            // Cria um identificador único para a Imagem
+            const filename = `${Date.now()}-${req.file.originalname}`;
 
-        blobStream.on('finish', () => {
-            
-            // Get public URL
-            const publicUrl = `https://storage.googleapis.com/${bucketName}/${filename}`;
-            
-            res.status(200).json({
-                message: 'Upload Realizado com Sucesso!',
-                imageUrl: publicUrl,
-                filename: filename,
-                sender: req.body.sender
+            // Cria o stream para upar a imagem
+            const blob = bucket.file(filename);
+            const blobStream = blob.createWriteStream({
+                resumable: false,
+                metadata: {
+                    contentType: req.file.mimetype
+                }
             });
 
-        });
+            blobStream.on('error', (error) => {
+                res.status(500).json({ message: 'Erro ao Subir a Imagem no Google Cloud Storage', error: error.message });
+            });
 
-        blobStream.end(req.file.buffer);
-    }
+            blobStream.on('finish', async () => {
+
+                // Get public URL
+                //const publicUrl = `https://storage.googleapis.com/${bucketName}/${filename}`;
+
+                const publicUrl = await generateSignedUrl(filename);
+
+                res.status(200).json({
+                    message: 'Upload Realizado com Sucesso!',
+                    imageUrl: publicUrl,
+                    filename: filename,
+                    sender: req.body.sender
+                });
+
+            });
+
+            blobStream.end(req.file.buffer);
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro no processamento do upload',
+                error: error.message
+            });
+        }
+    };
+
 }
 module.exports = new ImageController();
