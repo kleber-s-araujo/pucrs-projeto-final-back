@@ -58,8 +58,6 @@ module.exports = app => {
         res.redirect('/auth/signin');
     });
 
-    
-
     //Export
     app.use('/api/renderizador', router);
 };

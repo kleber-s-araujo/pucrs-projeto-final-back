@@ -53,6 +53,7 @@ require("./routes/cliente.js")(app);
 require("./routes/equipe.js")(app);
 require("./routes/requisicao.js")(app);
 require("./routes/dashboard.js")(app);
+require("./routes/images.js")(app);
 //require("./routes/statuscheck.js")(app);
 
 // set port, listen for requests

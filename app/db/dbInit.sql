@@ -234,6 +234,23 @@ CREATE TABLE arquivoSolicitacao (
   FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE RESTRICT
 );
 
+CREATE TABLE portifolio (
+  id INT AUTO_INCREMENT,
+  idRenderizador INT,
+  titulo VARCHAR(120),
+  descricao VARCHAR(255),
+  PRIMARY KEY (id),
+  FOREIGN KEY (idRenderizador) REFERENCES renderizador(id)
+);
+
+CREATE TABLE portifolioImages (
+  id INT,
+  imageName VARCHAR(255),
+  PRIMARY KEY (id),
+  FOREIGN KEY (id) REFERENCES portifolio(id) ON DELETE CASCADE
+);
+
+
 <-- use renderizaidb; -->
 <-- SELECT * FROM tipoPrioridade; -->
 <-- ALTER TABLE tipoPrioridade ADD COLUMN dias INT; -->
