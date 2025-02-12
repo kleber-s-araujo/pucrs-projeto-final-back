@@ -40,6 +40,19 @@ async function generateSignedUrl(fileName) {
     }
 };
 
+async function storeImageData(imageName, renderizador, titulo) {
+    try {
+        
+        const query = `INSERT INTO portifolio (idImagem, idRenderizador, titulo) VALUES (?,?,?)`;
+        const ret = dbConnection.promise().query(query, [imageName,renderizador,titulo]);
+        return ret;
+
+    } catch (error) {
+        console.error('Erro ao gravar Imagem no BD:', error);
+        throw error;
+    }
+}
+
 class ImageController {
     
     async postImage(req, res) {
@@ -72,12 +85,14 @@ class ImageController {
                 //const publicUrl = `https://storage.googleapis.com/${bucketName}/${filename}`;
 
                 const publicUrl = await generateSignedUrl(filename);
+                const qReturn   = await storeImageData(filename, req.body.sender, req.body.title);
 
                 res.status(200).json({
                     message: 'Upload Realizado com Sucesso!',
                     imageUrl: publicUrl,
                     filename: filename,
-                    sender: req.body.sender
+                    sender: req.body,
+                    queryRet: qReturn
                 });
 
             });

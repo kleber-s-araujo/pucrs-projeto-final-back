@@ -234,22 +234,14 @@ CREATE TABLE arquivoSolicitacao (
   FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE RESTRICT
 );
 
+use renderizaidb;
 CREATE TABLE portifolio (
-  id INT AUTO_INCREMENT,
+  idImagem VARCHAR(255),
   idRenderizador INT,
   titulo VARCHAR(120),
-  descricao VARCHAR(255),
-  PRIMARY KEY (id),
-  FOREIGN KEY (idRenderizador) REFERENCES renderizador(id)
+  PRIMARY KEY (idImagem),
+  FOREIGN KEY (idRenderizador) REFERENCES renderizador(id) ON DELETE CASCADE
 );
-
-CREATE TABLE portifolioImages (
-  id INT,
-  imageName VARCHAR(255),
-  PRIMARY KEY (id),
-  FOREIGN KEY (id) REFERENCES portifolio(id) ON DELETE CASCADE
-);
-
 
 <-- use renderizaidb; -->
 <-- SELECT * FROM tipoPrioridade; -->
