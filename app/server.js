@@ -14,7 +14,7 @@ const cors = require('cors');
 const app = express();
 
 var corsOptions = {
-  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+  origin: ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
   credentials: true,  // if you're sending cookies or authentication headers
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "application/json"]
@@ -22,7 +22,7 @@ var corsOptions = {
 
 app.use(cors({  
   origin: function (origin, callback) {
-    const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+    const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001', 'http://127.0.0.1:3001'];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {

@@ -210,6 +210,7 @@ class RenderizadorController {
     // Login Renderizador
     async login(req, res) {
         try {
+
             const { email, senha } = req.body;
             const [rows] = await dbConnection.promise().query(
                 'SELECT * FROM renderizador WHERE email = ?',
@@ -235,8 +236,7 @@ class RenderizadorController {
             delete renderizador.senha;
             delete renderizador.active;
 
-            if(renderizador)
-            {
+            if(renderizador) {
                 const secret = crypto.randomBytes(32).toString('hex');
                 req.session.isAuthenticated = true;
                 req.session.secret = secret;

@@ -33,6 +33,10 @@ module.exports = app => {
     router.post('/upload', 
         upload.single('image'),
         controller.postImage
+    );
+
+    router.get('/galeria/:max',
+        controller.getGalleryItems
     )
 
     // Error handling middleware

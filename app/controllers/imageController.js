@@ -107,5 +107,30 @@ class ImageController {
         }
     };
 
+    async getGalleryItems (req, res) {
+
+        try {
+            
+            const { max } = req.params;
+            const query = `SELECT p.*, r.nome FROM portifolio p
+                           INNER JOIN renderizador r ON r.id = p.idRenderizador
+                           LIMIT ${max};`;
+            const [rows] = await dbConnection.promise().query(query);
+
+            for (const row of rows) {
+                row.signedUrl = await generateSignedUrl(row.idImagem);
+            }
+            console.log(rows);
+            res.status(200).json({
+                rows
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro no listar Itens da Galeria',
+                error: error.message
+            });
+        }
+    }
 }
 module.exports = new ImageController();
