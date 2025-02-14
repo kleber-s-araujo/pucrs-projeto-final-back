@@ -139,3 +139,6 @@ dist
 *vertical*.json
 .env
 *.env
+*.config.js
+app/config/db.config.js
+/app/config

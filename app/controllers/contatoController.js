@@ -8,7 +8,23 @@
 
 const dbConnection = require('../models/db.js');
 const { validationResult } = require('express-validator');
+const { sendEmail } = require('./mailer.js');
 
+const getEmailContent = (nome, assunto) => {
+    return `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>Confirmação de Recebimento: ${assunto}</h2>
+        <p>Prezado(a) ${nome},</p>
+        <p>Agradecemos por entrar em contato conosco.</p>
+        <p>Gostaríamos de confirmar que recebemos sua solicitação e estamos processando as informações fornecidas. Nossa equipe está trabalhando para garantir que você receba uma resposta completa e informativa o mais breve possível.</p>
+        <p>Enquanto isso, se tiver qualquer outra dúvida ou necessitar de mais informações, por favor, não hesite em nos contatar.</p>
+        <p>Agradecemos a sua paciência e compreensão.</p>
+        <br>
+        <p>Atenciosamente,</p>
+        <p><strong>Equipe Renderizaí</strong></p>
+    </div>
+    `;
+};
 class contatoController {
 
     //Salvar Contato em BD
@@ -34,6 +50,10 @@ class contatoController {
                 message: 'Erro ao Inserir nova solicitação de Contato'
             });
         }
+
+        const subject = 'Solicitação de Contato: ' + assunto; 
+        const text = getEmailContent(nome, assunto);
+        await sendEmail(email, subject, text);
         res.status(200).json({
             message: 'Solicitação de Contato criada com Sucesso!',
             result: result.affectedRows

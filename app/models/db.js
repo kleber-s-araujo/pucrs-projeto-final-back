@@ -9,8 +9,8 @@
  */
 
 //
-const mysql     = require('mysql2');
-const dbConfig  = require('../config/db.config.js');
+const mysql = require('mysql2');
+const dbConfig = require('../config/db.config.js');
 
 // Create a connection to the database
 const connection = mysql.createConnection({
@@ -26,7 +26,5 @@ connection.connect(error => {
   if (error) throw error;
   console.log("Conectado ao Banco de Dados com Sucesso!");
 });
-
-
 
 module.exports = connection;

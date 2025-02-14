@@ -7,7 +7,7 @@
  * @Description: Backend da Aplicação Desenvolvida para o curso de pós-graduação em Desenvolvimento FullStack - PUCRS
  * Este Desenvolvimento via receber requisições e processá-las acessando o Banco de Dados MySQL via Docker
  */
-
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
@@ -56,6 +56,11 @@ require("./routes/dashboard.js")(app);
 require("./routes/images.js")(app);
 require("./routes/contato.js")(app);
 //require("./routes/statuscheck.js")(app);
+
+
+console.log('EMAIL_SERVICE:', process.env.EMAIL_SERVICE);
+console.log('EMAIL_USER:', process.env.EMAIL_USER);
+console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
 
 // set port, listen for requests
 //const PORT = process.env.PORT || 3030;
