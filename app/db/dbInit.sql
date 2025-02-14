@@ -234,13 +234,24 @@ CREATE TABLE arquivoSolicitacao (
   FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE RESTRICT
 );
 
-use renderizaidb;
 CREATE TABLE portifolio (
   idImagem VARCHAR(255),
   idRenderizador INT,
   titulo VARCHAR(120),
   PRIMARY KEY (idImagem),
   FOREIGN KEY (idRenderizador) REFERENCES renderizador(id) ON DELETE CASCADE
+);
+
+use renderizaidb;
+CREATE TABLE contato (
+  id INT AUTO_INCREMENT,
+  nome VARCHAR(100),
+  email VARCHAR(100),
+  assunto VARCHAR(120),
+  telefone VARCHAR(30),
+  mensagem  VARCHAR(1000),
+  statusContato VARCHAR(30),
+  PRIMARY KEY (id)
 );
 
 <-- use renderizaidb; -->

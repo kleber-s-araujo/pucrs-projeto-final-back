@@ -8,19 +8,21 @@
 module.exports = app => {
 
     const express = require('express');
-    const router = new express.Router();
-    const { body } = require('express-validator');
+    const { body, validationResult  } = require('express-validator');
+    const router = new express.Router();    
     const controller = require('../controllers/contatoController');
 
+    app.use(express.json()); // For parsing JSON payloads
+    app.use(express.urlencoded({ extended: true })); // For parsing form data
+
     router.post('/mensagem',
-        body('nome').not().isEmpty().escape(),
-        body('email').isEmail().escape(),
-        body('assunto').not().isEmpty().escape(),
-        body('telefone').not().isEmpty().escape(),
-        body('mensagem').not().isEmpty().escape(),
+        body('nome').notEmpty().withMessage('Informar o Nome'),
+        body('email').isEmail().withMessage('Email inválido'),
+        body('assunto').notEmpty().withMessage('Informar o Assunto'),
+        body('telefone').notEmpty().withMessage('Informar o Telefone'),
+        body('mensagem').notEmpty().withMessage('Informar a Mensagem'),
         controller.postContato
     );
-
 
     //Export
     app.use('/api/contato', router);

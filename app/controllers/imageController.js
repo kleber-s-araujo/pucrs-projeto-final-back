@@ -120,7 +120,6 @@ class ImageController {
             for (const row of rows) {
                 row.signedUrl = await generateSignedUrl(row.idImagem);
             }
-            console.log(rows);
             res.status(200).json({
                 rows
             });
