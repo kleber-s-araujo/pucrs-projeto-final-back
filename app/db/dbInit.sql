@@ -254,6 +254,19 @@ CREATE TABLE contato (
   PRIMARY KEY (id)
 );
 
+use renderizaidb;
+CREATE TABLE trabalhe (
+  id INT AUTO_INCREMENT,
+  nome VARCHAR(100),
+  email VARCHAR(100),
+  especialidade VARCHAR(120),
+  telefone VARCHAR(30),
+  links VARCHAR(100),
+  mensagem  VARCHAR(1000),
+  statusContato VARCHAR(30),
+  PRIMARY KEY (id)
+);
+
 <-- use renderizaidb; -->
 <-- SELECT * FROM tipoPrioridade; -->
 <-- ALTER TABLE tipoPrioridade ADD COLUMN dias INT; -->

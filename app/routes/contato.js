@@ -24,6 +24,16 @@ module.exports = app => {
         controller.postContato
     );
 
+    router.post('/trabalhe',
+        body('nome').notEmpty().withMessage('Informar o Nome'),
+        body('email').isEmail().withMessage('Email inválido'),
+        body('especialidade').notEmpty().withMessage('Informar Especialidade'),
+        body('telefone').notEmpty().withMessage('Informar o Telefone'),
+        body('links').notEmpty().withMessage('Informar Links'),
+        body('mensagem').notEmpty().withMessage('Informar a Mensagem'),
+        controller.postTrabalheConosco
+    );
+
     //Export
     app.use('/api/contato', router);
 }

@@ -57,11 +57,6 @@ require("./routes/images.js")(app);
 require("./routes/contato.js")(app);
 //require("./routes/statuscheck.js")(app);
 
-
-console.log('EMAIL_SERVICE:', process.env.EMAIL_SERVICE);
-console.log('EMAIL_USER:', process.env.EMAIL_USER);
-console.log('EMAIL_PASS:', process.env.EMAIL_PASS);
-
 // set port, listen for requests
 //const PORT = process.env.PORT || 3030;
 const PORT = 3030;

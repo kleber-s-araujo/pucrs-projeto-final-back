@@ -2,10 +2,6 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const dbConfig = require('../config/db.config.js');
 
-console.log('EMAIL_SERVICE:', process.env.EMAIL_SERVICE);
-console.log('EMAIL_USER:',    process.env.EMAIL_USER);
-console.log('EMAIL_PASS:',    process.env.EMAIL_PASS);
-
 /* Configura o Transporter */
 const transporter = nodemailer.createTransport({
     service: dbConfig.EMAIL_SERVICE,

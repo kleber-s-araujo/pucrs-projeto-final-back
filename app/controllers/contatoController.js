@@ -25,6 +25,22 @@ const getEmailContent = (nome, assunto) => {
     </div>
     `;
 };
+
+const getEmailContentTrabalhe = (nome) => {
+    return `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <p>Olá, ${nome},</p>
+        <p>Agradecemos por expressar seu interesse de trabalhar conosco.</p>
+        <p>Gostaríamos de confirmar que recebemos seus dados e estamos processando as informações fornecidas.</p>
+        <p>Enquanto isso, se tiver qualquer outra dúvida ou necessitar de mais informações, por favor, não hesite em nos contatar.</p>
+        <p>Agradecemos a sua paciência e compreensão.</p>
+        <br>
+        <p>Atenciosamente,</p>
+        <p><strong>Equipe Renderizaí</strong></p>
+    </div>
+    `;
+};
+
 class contatoController {
 
     //Salvar Contato em BD
@@ -53,6 +69,39 @@ class contatoController {
 
         const subject = 'Solicitação de Contato: ' + assunto; 
         const text = getEmailContent(nome, assunto);
+        await sendEmail(email, subject, text);
+        res.status(200).json({
+            message: 'Solicitação de Contato criada com Sucesso!',
+            result: result.affectedRows
+        });
+    }
+
+    //Salvar Contato em BD
+    async postTrabalheConosco(req, res) {
+
+        //Verifica Validações de Entrada
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) 
+            return res.status(400).json({ errors: errors.array() });
+        
+        console.log(req.body);
+
+        //Recebe os Parâmetros
+        const { nome, email, especialidade, telefone, links, mensagem } = req.body;
+        const params = [nome, email, especialidade, telefone, links, mensagem];
+        
+        //Monta a Query e Executa
+        const query = `INSERT INTO trabalhe (nome, email, especialidade, telefone, links, mensagem, statusContato)
+                       VALUES (?,?,?,?,?,?,'Aberto');`;
+        const result = await dbConnection.promise().query(query, params);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: 'Erro ao Inserir Solicitação de Trabalho'
+            });
+        }
+
+        const subject = 'Trabalhe Conosco: ' + nome; 
+        const text = getEmailContentTrabalhe(nome);
         await sendEmail(email, subject, text);
         res.status(200).json({
             message: 'Solicitação de Contato criada com Sucesso!',
