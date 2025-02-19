@@ -89,8 +89,6 @@ const initTabelasDadosMestre = (req, res) => {
 const getTiposClienteByLang = async (req, res) => {
 
     try {
-
-        console.log(req.params.lang);
         const query = 'SELECT * FROM tipoCliente WHERE lang = ?';
         dbConnection.query(query, [req.params.lang], (err, result) => {
             if (err) throw err;
@@ -121,7 +119,6 @@ const getAllTiposCliente = async (req, res) => {
 
     try {
 
-        console.log(req.params.lang);
         const query = 'SELECT * FROM tipoCliente;';
         dbConnection.query(query, (err, result) => {
             if (err) throw err;

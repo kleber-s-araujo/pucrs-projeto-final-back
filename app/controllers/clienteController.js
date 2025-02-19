@@ -7,6 +7,7 @@
  */
 
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { validationResult } = require('express-validator');
 const dbConnection = require('../models/db.js');
 
@@ -40,6 +41,20 @@ class ClienteController {
         }
     }
 
+    async updateImage(req, res) {
+
+        try {   
+            
+            if (!req.file) {
+                return res.status(400).json({ message: 'Nenhum Arquivo enviado!' });
+            }
+
+            return res.status(200).json({ message: 'Arquivo recebido!', file: req.file });
+
+        } catch (error) {
+            console.log("Erro:", error.message)
+        }
+    }
     
     // Busca Cliente pelo ID
     async getClienteById(req, res) {
@@ -183,11 +198,11 @@ class ClienteController {
         }
     }
 
-    // Login Renderizador
+    // Login Cliente
     async login(req, res) {
         try {
             const { email, senha } = req.body;
-            const [rows] = await db.query(
+            const [rows] = await dbConnection.promise().query(
                 'SELECT * FROM cliente WHERE email = ?',
                 [email]
             );
@@ -198,8 +213,8 @@ class ClienteController {
                 });
             }
 
-            const renderizador = rows[0];
-            const validPassword = await bcrypt.compare(senha, renderizador.senha);
+            const cliente = rows[0];
+            const validPassword = await bcrypt.compare(senha, cliente.senha);
 
             if (!validPassword) {
                 return res.status(401).json({
@@ -207,14 +222,21 @@ class ClienteController {
                 });
             }
 
+            const secret = crypto.randomBytes(32).toString('hex');
+            req.session.isAuthenticated = true;
+            req.session.secret = secret;
+            req.session.email  = cliente.email;
+
             // Remove senha e active da resposta
-            delete renderizador.senha;
-            delete renderizador.active;
+            delete cliente.senha;
+            delete cliente.active;
 
             res.status(200).json({
                 message: 'Login realizado com Sucesso!',
-                renderizador
+                cliente,
+                session: req.session
             });
+
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({
