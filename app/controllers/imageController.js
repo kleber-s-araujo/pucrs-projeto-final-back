@@ -17,7 +17,7 @@ const storage = new Storage({
 const bucketName = 'renderizai-portifolio';
 const bucket = storage.bucket(bucketName);
 
-async function generateSignedUrl(fileName) {
+async function generateSignedUrl(bucket, fileName) {
 
     try {
 
@@ -54,6 +54,26 @@ async function storeImageData(imageName, renderizador, titulo) {
 }
 
 class ImageController {
+
+    async genSignedUrl (bucket, filename)
+    {
+        return generateSignedUrl(bucket, filename);
+    }
+
+    async getURLByImageName (req, res) {
+
+        const { name } = req.params;
+        const publicUrl = await generateSignedUrl(bucket, name);
+        
+        if(publicUrl)
+            res.status(200).json({
+                imageUrl: publicUrl
+            });
+        else
+            res.status(500).json({
+                message: 'Erro ao gerar URL para a Imagem'
+            });
+    }
     
     async postImage(req, res) {
 
@@ -84,7 +104,7 @@ class ImageController {
                 // Get public URL
                 //const publicUrl = `https://storage.googleapis.com/${bucketName}/${filename}`;
 
-                const publicUrl = await generateSignedUrl(filename);
+                const publicUrl = await generateSignedUrl(bucket, filename);
                 const qReturn   = await storeImageData(filename, req.body.sender, req.body.title);
 
                 res.status(200).json({

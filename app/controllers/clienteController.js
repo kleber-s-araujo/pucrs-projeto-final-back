@@ -8,8 +8,29 @@
 
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const { validationResult } = require('express-validator');
+const { validationResult, param } = require('express-validator');
 const dbConnection = require('../models/db.js');
+const { Storage } = require('@google-cloud/storage');
+const imageController = require('./imageController.js');
+const storage = new Storage({
+    keyFilename: './acc_keys/vertical-set-449223-s3-4ac4029eb1e4.json',
+    projectId: 'vertical-set-449223-s3'
+});
+const bucketName = 'renderizai-profile';
+const bucket = storage.bucket(bucketName);
+
+async function storeClientImage(imageName, id) {
+    try {
+        
+        const query = `UPDATE cliente SET fotoPerfil = '${imageName}' WHERE id = ${id};`;
+        const ret = dbConnection.promise().query(query);
+        return ret;
+
+    } catch (error) {
+        console.error('Erro ao gravar Imagem no BD:', error);
+        throw error;
+    }
+}
 
 class ClienteController {
 
@@ -45,17 +66,68 @@ class ClienteController {
 
         try {   
             
+            const { id } = req.params;
+
             if (!req.file) {
                 return res.status(400).json({ message: 'Nenhum Arquivo enviado!' });
             }
 
-            return res.status(200).json({ message: 'Arquivo recebido!', file: req.file });
+            const path = require('path');
+            //Salva Imagem no Bucket Google
+            const filename = 'client-' + id + path.extname(req.file.originalname);
+
+            // Cria o stream para upar a imagem
+            const blob = bucket.file(filename);
+            const blobStream = blob.createWriteStream({
+                resumable: false,
+                metadata: {
+                    contentType: req.file.mimetype
+                }
+            });
+
+            blobStream.on('error', (error) => {
+                res.status(500).json({ message: 'Erro ao Subir a Imagem no Google Cloud Storage', error: error.message });
+            });
+
+            blobStream.on('finish', async () => {
+
+                // Get public URL
+                //const publicUrl = `https://storage.googleapis.com/${bucketName}/${filename}`;
+
+                const publicUrl = await imageController.genSignedUrl(bucket, filename);
+                const qReturn   = await storeClientImage(filename, id);
+
+                res.status(200).json({
+                    message: 'Upload Realizado com Sucesso!',
+                    imageUrl: publicUrl,
+                    filename: filename,
+                    queryRet: qReturn
+                });
+
+            });
+
+            blobStream.end(req.file.buffer);
 
         } catch (error) {
             console.log("Erro:", error.message)
         }
     }
     
+    async getURLByImageName (req, res) {
+
+        const { name } = req.params;
+        const publicUrl = await imageController.genSignedUrl(bucket, name);
+        
+        if(publicUrl)
+            res.status(200).json({
+                imageUrl: publicUrl
+            });
+        else
+            res.status(500).json({
+                message: 'Erro ao gerar URL para a Imagem'
+            });
+    }
+
     // Busca Cliente pelo ID
     async getClienteById(req, res) {
         try {

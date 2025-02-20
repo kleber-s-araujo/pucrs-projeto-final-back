@@ -37,6 +37,10 @@ module.exports = app => {
 
     router.get('/galeria/:max',
         controller.getGalleryItems
+    );
+
+    router.get('/name/:name',
+        controller.getURLByImageName
     )
 
     // Error handling middleware

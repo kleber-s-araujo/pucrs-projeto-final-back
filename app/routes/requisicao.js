@@ -23,6 +23,10 @@ module.exports = app => {
 
     router.get('/id/:id', controller.getRequisicaoById);
 
+    router.get('/cliente/:id',
+        controller.getRequisicaoPorCliente
+    )
+
     router.get('/', controller.getAll);
 
     //Export

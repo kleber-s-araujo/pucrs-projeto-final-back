@@ -171,7 +171,7 @@ class RequisicaoController {
                     pr.descricao as pacote,
                     rc.tipoProjeto,
                     rc.m2Interno,
-                    rc.m2Edificação,
+                    rc.m2Edificacao,
                     rc.m2Terreno,
                     rc.proporcao,
                     rc.ambientes,
@@ -183,16 +183,19 @@ class RequisicaoController {
                     INNER JOIN requisicaoCliente rc_link ON rc_link.idRequisicao = rr.id
                     LEFT JOIN renderConfig rc ON rc.id = rr.id
                     LEFT JOIN tipoStatus ts ON ts.id = rr.status
+                                             AND ts.lang = 'pt'
                     LEFT JOIN tipoPrioridade tp ON tp.id = rr.prioridade
+                                             AND tp.lang = 'pt'
                     LEFT JOIN pacoteRender pr ON pr.id = rr.pacote
+                                             AND pr.lang = 'pt'
                     LEFT JOIN requisicaoRenderizador rr_link ON rr_link.idRequisicao = rr.id
                     LEFT JOIN renderizador r ON r.id = rr_link.idRenderizador
                 WHERE 
-                    rc_link.idCliente = ?
+                    rc_link.idCliente = ${id}
                 ORDER BY 
                     rr.dataRegistro DESC; `;
 
-            const [result] = await dbConnection.promise.query(query, [id]);
+            const [result] = await dbConnection.promise().query(query);
 
             if (result.length === 0) {
                 return res.status(404).json({ error: 'Sem Requisições para o Cliente' });
@@ -201,12 +204,12 @@ class RequisicaoController {
             res.json(result);
 
         } catch (error) {
-            res.status(500).json({ error: 'Erro ao buscar requisições por Cliente' });
+            res.status(500).json({ error: 'Erro ao buscar requisições por Cliente', message: error.message });
         }
          
     }
 
-    async getRequisicaoPorCliente(req, res) {
+    async getRequisicaoPorRenderizador(req, res) {
 
         try {
             

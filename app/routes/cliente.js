@@ -78,6 +78,10 @@ module.exports = app => {
         });
     });
 
+    router.get('/image/:name',
+        controller.getURLByImageName
+    )
+
     //Export
     app.use('/api/cliente', router);
 }
