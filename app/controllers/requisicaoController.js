@@ -11,56 +11,86 @@ const dbConnection = require('../models/db.js');
 
 class RequisicaoController {
 
-    async createRequisicao(req, res) {
+    async createRequisicao(req, res) {       
 
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
 
+            await dbConnection.promise().beginTransaction();
+
+            // Extract data from request body
             const {
+
+                // RequisicaoRender
+                idCliente,
                 titulo,
                 descricao,
-                pacote,
+                tipoProjeto,
                 prioridade,
                 status,
+                valor,
+
+                // RenderConfig
+                pacote,
+                m2Interno,
+                m2Edificacao,
+                m2Terreno,
                 isProjetoGrande,
-                renderConfig,
-                idCliente
+                proporcao,
+                ambientes,
+                iluminacoes,
+                outraIluminacao,
+                servicosAdicionais,
+                imagensAdicionais,
+                tempoVideo
             } = req.body;
 
+            const statusNew = 1;
+
+            // Insere a Requisição
             const [result] = await dbConnection.promise().query(
                 `INSERT INTO requisicaoRender 
-            (titulo, descricao, dataRegistro, pacote, prioridade, status, isProjetoGrande) 
-            VALUES (?, ?, NOW(), ?, ?, ?, ?)`,
-                [titulo, descricao, pacote, prioridade, status, isProjetoGrande]
+                (idCliente, titulo, descricao, dataRegistro, tipoProjeto, prioridade, status, valor)
+                VALUES (?, ?, ?, NOW(), ?, ?, ?, ?)`,
+                [idCliente, titulo, descricao, tipoProjeto, prioridade, statusNew, valor]
             );
 
-            const requisicaoId = result.insertId;
-            const [result2] = await dbConnection.promise().query(
+            const newRenderRequestId = result.insertId;
+
+            // Converte arrays em JSON
+            const ambientesJson = JSON.stringify(ambientes);
+            const iluminacoesJson = JSON.stringify(iluminacoes);
+            const servicosAdicionaisJson = JSON.stringify(servicosAdicionais);
+
+            // Insert into renderConfig
+            await dbConnection.promise().query(
                 `INSERT INTO renderConfig 
-            (id, tipoProjeto, m2Interno, m2Edificacao, m2Terreno, proporcao, ambientes, servicosAdicionais, iluminacoes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                (id, pacote, m2Interno, m2Edificacao, m2Terreno, isProjetoGrande, 
+                proporcao, ambientes, iluminacoes, outraIluminacao, 
+                servicosAdicionais, imagensAdicionais, tempoVideo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    requisicaoId,
-                    renderConfig.tipoProjeto,
-                    renderConfig.m2Interno,
-                    renderConfig.m2Edificacao,
-                    renderConfig.m2Terreno,
-                    renderConfig.proporcao,
-                    renderConfig.ambientes,
-                    renderConfig.servicosAdicionais,
-                    renderConfig.iluminacoes
+                    newRenderRequestId, pacote, m2Interno, m2Edificacao, m2Terreno,
+                    isProjetoGrande, proporcao, ambientesJson, iluminacoesJson,
+                    outraIluminacao, servicosAdicionaisJson, imagensAdicionais, tempoVideo
                 ]
             );
 
+            // Commit transaction
+            await dbConnection.promise().commit();
             res.status(201).json({
-                id: requisicaoId, message: 'Requisição criada com sucesso'
+                message: 'Requisição de Render criada!',
+                idRequisicao: newRenderRequestId
             });
 
         } catch (error) {
-            res.status(500).json({ error: 'Erro ao criar Requisição' });
+
+            // Rollback na transação
+            await dbConnection.promise().rollback();
+            res.status(500).json({ error: 'Erro ao criar Requisição', error: error.message });
+
+        } finally {
+            // Close connection
+            //await dbConnection.promise().end();
         }
     }
 
@@ -108,7 +138,7 @@ class RequisicaoController {
             Object.assign(requisicao[0], { renderConfig: renderConfig[0] });
             res.json(requisicao[0]);
 
-        } catch (error) {            
+        } catch (error) {
             res.status(500).json({ error: 'Erro ao buscar requisição', error });
         }
     }
@@ -116,7 +146,7 @@ class RequisicaoController {
     async getRequisicaoPorEquipe(req, res) {
 
         try {
-            
+
             const { id } = req.params;
             const query = `
                 SELECT DISTINCT
@@ -158,18 +188,19 @@ class RequisicaoController {
     async getRequisicaoPorCliente(req, res) {
 
         try {
-            
+
             const { id } = req.params;
             const query = `
                 SELECT 
                     rr.id,
+                    rr.idCliente,
                     rr.titulo,
                     rr.descricao,
-                    DATE_FORMAT(rr.dataRegistro, '%d/%m/%Y %H:%i') as data_registro,
+                    DATE_FORMAT(rr.dataRegistro, '%d/%m/%Y %H:%i') as dataRegistro,
+                    rr.tipoProjeto,
                     ts.descricao as status,
-                    tp.descricao as prioridade,
-                    pr.descricao as pacote,
-                    rc.tipoProjeto,
+                    rr.descricao as prioridade,
+                    rc.pacote,                    
                     rc.m2Interno,
                     rc.m2Edificacao,
                     rc.m2Terreno,
@@ -177,21 +208,20 @@ class RequisicaoController {
                     rc.ambientes,
                     rc.servicosAdicionais,
                     rc.iluminacoes,
+                    rr.valor,
+                    r.id as idRenderizador,
                     r.nome as renderizador
                 FROM 
                     requisicaoRender rr
-                    INNER JOIN requisicaoCliente rc_link ON rc_link.idRequisicao = rr.id
                     LEFT JOIN renderConfig rc ON rc.id = rr.id
                     LEFT JOIN tipoStatus ts ON ts.id = rr.status
                                              AND ts.lang = 'pt'
                     LEFT JOIN tipoPrioridade tp ON tp.id = rr.prioridade
                                              AND tp.lang = 'pt'
-                    LEFT JOIN pacoteRender pr ON pr.id = rr.pacote
-                                             AND pr.lang = 'pt'
                     LEFT JOIN requisicaoRenderizador rr_link ON rr_link.idRequisicao = rr.id
                     LEFT JOIN renderizador r ON r.id = rr_link.idRenderizador
                 WHERE 
-                    rc_link.idCliente = ${id}
+                    rr.idCliente = ${id}
                 ORDER BY 
                     rr.dataRegistro DESC; `;
 
@@ -206,13 +236,13 @@ class RequisicaoController {
         } catch (error) {
             res.status(500).json({ error: 'Erro ao buscar requisições por Cliente', message: error.message });
         }
-         
+
     }
 
     async getRequisicaoPorRenderizador(req, res) {
 
         try {
-            
+
             const { id } = req.params;
             const query = `
                 SELECT 
@@ -258,13 +288,13 @@ class RequisicaoController {
         } catch (error) {
             res.status(500).json({ error: 'Erro ao buscar requisições da equipe' });
         }
-         
+
     }
 
     async atualizaStatus(req, res) {
 
         try {
-            
+
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
@@ -299,20 +329,69 @@ class RequisicaoController {
     }
 
     async atribuiAoRenderizador(req, res) {
-            
+
         try {
-            
+
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }
 
-            
+
 
         } catch (error) {
             
         }
+
+    }
+
+    async postMensagem(req, res) {
+
+        try {
+            
+            console.log(req.body);
+            const { idRequisicao, enviadoPor, mensagem } = req.body;
+            const query = `INSERT INTO mensagensRequisicao (idRequisicao, enviadoPor, mensagem, dataRegistro)
+                VALUES (?, ?, ?, NOW());`;
+            
+            const result = await dbConnection.promise().query(query, [idRequisicao, enviadoPor, mensagem]);
+            res.status(201).json({
+                message: 'Mensagem Inserida',
+                msgID: result.insertId
+            });
         
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro ao inserir Mensagem',
+                error: error.message
+            });
+        }
+
+    }
+
+    async getMensagens(req, res) {
+
+        try {
+            
+            const { id } = req.params;
+            const query = `SELECT * FROM mensagensRequisicao 
+                           WHERE idRequisicao = ${id}
+                           ORDER BY idMensagem ASC;`;
+            
+            const [result] = await dbConnection.promise().query(query);
+
+            if (result.length > 0) 
+                return res.status(200).json(result);
+            
+            return res.status(404).json({message: 'Erro ao Buscar Mensagens'});
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro ao Buscar Mensagens',
+                error: error.message
+            });
+        }
     }
 }
 

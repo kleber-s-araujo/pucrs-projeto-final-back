@@ -86,6 +86,9 @@ CREATE TABLE renderizador (
   dataRegistro TIMESTAMP,
   capacidade INT,
   active BOOLEAN,
+  titulo VARCHAR(100),
+  localidade VARCHAR(100),
+  site VARCHAR(255);
   PRIMARY KEY (id),
   FOREIGN KEY (capacidade) REFERENCES capacidadeRenderizador(id)
 );
@@ -127,40 +130,34 @@ CREATE TABLE equipeRenderizador (
 
 CREATE TABLE requisicaoRender (
   id INT AUTO_INCREMENT,
-  titulo VARCHAR(50),
-  descricao VARCHAR(255),
+  idCliente INT,
+  titulo VARCHAR(100),
+  descricao VARCHAR(500),
   dataRegistro TIMESTAMP,
-  pacote INT,
-  prioridade INT,
+  tipoProjeto VARCHAR(30),  
+  prioridade VARCHAR(30),
   status INT,
-  isProjetoGrande BOOLEAN,
   valor decimal(15, 2),
   PRIMARY KEY (id),
-  FOREIGN KEY (pacote) REFERENCES pacoteRender(id) ON DELETE RESTRICT,
-  FOREIGN KEY (prioridade) REFERENCES tipoPrioridade(id) ON DELETE RESTRICT,
   FOREIGN KEY (status) REFERENCES tipoStatus(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE renderConfig (
   id INT,
-  tipoProjeto VARCHAR(50) NOT NULL,
+  pacote VARCHAR(30),
   m2Interno INT,
   m2Edificacao INT,
   m2Terreno INT,
+  isProjetoGrande BOOLEAN,
   proporcao VARCHAR(50),
-  ambientes VARCHAR(500),
+  ambientes VARCHAR(1000),
+  iluminacoes VARCHAR(1000),
+  outraIluminacao VARCHAR(100),
   servicosAdicionais VARCHAR(500),
-  iluminacoes VARCHAR(500),
+  imagensAdicionais INT,
+  tempoVideo INT,  
   PRIMARY KEY (id),
   FOREIGN KEY (id) REFERENCES requisicaoRender(id) ON DELETE CASCADE
-);
-
-CREATE TABLE requisicaoCliente (
-  idRequisicao INT,
-  idCliente INT,
-  PRIMARY KEY (idRequisicao, idCliente),
-  FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE RESTRICT, 
-  FOREIGN KEY (idCliente) REFERENCES cliente(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE requisicaoRenderizador (
@@ -175,6 +172,7 @@ CREATE TABLE mensagensRequisicao (
   idMensagem INT AUTO_INCREMENT,
   idRequisicao INT,
   enviadoPor INT,
+  mensagem varchar(150),
   dataRegistro TIMESTAMP,
   PRIMARY KEY (idMensagem, idRequisicao),
   FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE CASCADE
@@ -191,6 +189,7 @@ CREATE TABLE renderFeedback (
 
 CREATE TABLE fatura (
   id INT AUTO_INCREMENT,
+  idCliente INT,
   idRequisicao INT,  
   tipoPagamento INT,
   dataRegistro TIMESTAMP,
@@ -199,14 +198,6 @@ CREATE TABLE fatura (
   status INT,
   PRIMARY KEY (id, idRequisicao),
   FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE RESTRICT
-);
-
-CREATE TABLE faturaCliente (
-  idFatura INT,
-  idCliente INT,
-  PRIMARY KEY (idFatura, idCliente),
-  FOREIGN KEY (idFatura) REFERENCES fatura(id) ON DELETE RESTRICT,
-  FOREIGN KEY (idCliente) REFERENCES cliente(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE faturaRenderizador (
@@ -221,7 +212,6 @@ CREATE TABLE arquivo (
   id VARCHAR(255),
   tipo INT,
   nome VARCHAR(255),
-  urlArquivo VARCHAR(255),
   dataRegistro TIMESTAMP,
   PRIMARY KEY (id)
 );
@@ -242,7 +232,6 @@ CREATE TABLE portifolio (
   FOREIGN KEY (idRenderizador) REFERENCES renderizador(id) ON DELETE CASCADE
 );
 
-use renderizaidb;
 CREATE TABLE contato (
   id INT AUTO_INCREMENT,
   nome VARCHAR(100),
@@ -254,7 +243,6 @@ CREATE TABLE contato (
   PRIMARY KEY (id)
 );
 
-use renderizaidb;
 CREATE TABLE trabalhe (
   id INT AUTO_INCREMENT,
   nome VARCHAR(100),
@@ -266,14 +254,3 @@ CREATE TABLE trabalhe (
   statusContato VARCHAR(30),
   PRIMARY KEY (id)
 );
-
-<-- use renderizaidb; -->
-<-- SELECT * FROM tipoPrioridade; -->
-<-- ALTER TABLE tipoPrioridade ADD COLUMN dias INT; -->
-<-- UPDATE tipoPrioridade SET dias = 15 WHERE id = 1; -->
-
-<-- use renderizaidb; -->
-<-- alter table renderizador  -->
-<--  ADD COLUMN titulo VARCHAR(100), --> 
-<--  ADD COLUMN localidade VARCHAR(100), -->
-<--  ADD COLUMN site VARCHAR(255); -->

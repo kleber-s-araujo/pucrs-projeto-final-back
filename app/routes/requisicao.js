@@ -29,6 +29,14 @@ module.exports = app => {
 
     router.get('/', controller.getAll);
 
+    router.get('/mensagens/:id',
+        controller.getMensagens
+    )
+
+    router.post('/mensagem',
+        controller.postMensagem
+    )
+
     //Export
     app.use('/api/requisicao', router);
 }
