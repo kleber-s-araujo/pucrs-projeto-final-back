@@ -58,6 +58,10 @@ module.exports = app => {
         controller.getFiles
     )
 
+    router.get('/req/:id/file/:filename',
+        controller.genURLDownload
+    )
+
     router.delete('/file',
         controller.deleteFile
     )

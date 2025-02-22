@@ -499,6 +499,26 @@ class RequisicaoController {
         }
     }
 
+    async genURLDownload(req, res) {
+        try {
+
+            const { id, filename } = req.params;
+            const filename2 = id + '-' + filename;
+            const publicUrl = await imageController.genSignedUrl(bucket, filename2);   
+
+            res.status(200).json({
+                message: 'URL Gerada',
+                url: publicUrl
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro ao Buscar URL do Arquivo',
+                error: error.message
+            });   
+        }     
+    }
+
     async getFiles(req, res) {
         try {
 
