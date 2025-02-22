@@ -8,6 +8,37 @@
 
 const { validationResult } = require('express-validator');
 const dbConnection = require('../models/db.js');
+const imageController = require('./imageController.js');
+const { Storage } = require('@google-cloud/storage');
+const storage = new Storage({
+    keyFilename: './acc_keys/vertical-set-449223-s3-4ac4029eb1e4.json',
+    projectId: 'vertical-set-449223-s3'
+});
+const bucketName = 'renderizai-files';
+const bucket = storage.bucket(bucketName);
+
+async function generateSignedUrl(bucket, fileName) {
+
+    try {
+
+        const file = bucket.file(fileName);
+
+        // Configurações da URL assinada
+        const options = {
+            version: 'v4',
+            action: 'read',
+            expires: Date.now() + 60 * 60 * 1000, // URL válida por 60 minutos
+        };
+
+        // Gera a URL assinada
+        const [url] = await file.getSignedUrl(options);
+        return url;
+
+    } catch (error) {
+        console.error('Erro ao gerar URL assinada:', error);
+        throw error;
+    }
+};
 
 class RequisicaoController {
 
@@ -389,6 +420,103 @@ class RequisicaoController {
         } catch (error) {
             res.status(500).json({
                 message: 'Erro ao Buscar Mensagens',
+                error: error.message
+            });
+        }
+    }
+
+    async postFile(req, res) {
+        try {
+
+            if (!req.file) {
+                return res.status(400).json({ message: 'Nenhum Arquivo enviado!' });
+            }
+
+            const { tipo, sender, requisicao, filename } = req.body;
+
+            // Cria o stream para upar o arquivo
+            const filename2 = requisicao + '-' + filename;
+            const blob = bucket.file(filename2);
+            const blobStream = blob.createWriteStream({
+                resumable: false,
+                metadata: {
+                    contentType: req.file.mimetype
+                }
+            });
+
+            blobStream.on('error', (error) => {
+                res.status(500).json({ message: 'Erro ao Subir Arquivo no Google Cloud Storage', error: error.message });
+            });
+
+            blobStream.on('finish', async () => {
+
+                const publicUrl = await imageController.genSignedUrl(bucket, filename2);                
+                const query = `INSERT INTO arquivo (nome, idRequisicao, tipo, sender, dataRegistro)
+                               VALUES ('${filename}', ${requisicao}, ${tipo}, ${sender}, NOW());`;
+                const [result] = await dbConnection.promise().query(query);
+
+                res.status(201).json({
+                    message: 'Upload Realizado com Sucesso!',
+                    imageUrl: publicUrl,
+                    filename: filename,
+                    sender: req.body,
+                    fileId: result.insertId
+                });
+
+            });
+
+            blobStream.end(req.file.buffer);
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro ao realizar upload do arquivo',
+                error: error.message
+            });
+        } 
+    }
+
+    async deleteFile(req, res) {
+        try {
+            
+            const { fileName, requisicao } = req.body;
+
+            //Deleta do GCloud
+            const filename2 = requisicao + '-' + fileName;
+            await bucket.file(filename2).delete();
+            
+            const query = `DELETE FROM arquivo WHERE nome = ? AND idRequisicao = ${requisicao};`;
+            await dbConnection.promise().query(query, fileName);
+
+            res.status(204).json({
+                message: 'Arquivo Removido',
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro ao Deletar Arquivo',
+                error: error.message
+            });
+        }
+    }
+
+    async getFiles(req, res) {
+        try {
+
+            const { id } = req.params;
+            const query = `SELECT * FROM arquivo 
+                           WHERE idRequisicao = ${id}
+                           ORDER BY tipo ASC;`;
+            
+            const [result] = await dbConnection.promise().query(query);
+
+            if (result.length > 0) 
+                return res.status(200).json(result);
+            
+            return res.status(404).json({message: 'Nenhum Arquivo Encontrado'});
+
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro ao Buscar Arquivos',
                 error: error.message
             });
         }

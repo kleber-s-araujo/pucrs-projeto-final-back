@@ -209,19 +209,13 @@ CREATE TABLE faturaRenderizador (
 );
 
 CREATE TABLE arquivo (
-  id VARCHAR(255),
-  tipo INT,
   nome VARCHAR(255),
-  dataRegistro TIMESTAMP,
-  PRIMARY KEY (id)
-);
-
-CREATE TABLE arquivoSolicitacao (
-  idArquivo VARCHAR(255),
   idRequisicao INT,
-  PRIMARY KEY (idArquivo, idRequisicao),
-  FOREIGN KEY (idArquivo) REFERENCES arquivo(id) ON DELETE RESTRICT,
-  FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE RESTRICT
+  tipo INT,
+  sender INT,
+  dataRegistro TIMESTAMP,
+  PRIMARY KEY (nome),
+  FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE CASCADE
 );
 
 CREATE TABLE portifolio (

@@ -8,8 +8,8 @@
 
 const { validationResult } = require('express-validator');
 const dbConnection = require('../models/db.js');
-const { Storage } = require('@google-cloud/storage');
 
+const { Storage } = require('@google-cloud/storage');
 const storage = new Storage({
     keyFilename: './acc_keys/vertical-set-449223-s3-4ac4029eb1e4.json',
     projectId: 'vertical-set-449223-s3'
