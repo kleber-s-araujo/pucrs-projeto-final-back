@@ -66,6 +66,10 @@ module.exports = app => {
         controller.deleteFile
     )
 
+    router.get('/status/:id',
+        controller.getStatusAtual
+    )
+
     // Error handling middleware
     router.use((error, req, res, next) => {
         if (error instanceof multer.MulterError) {

@@ -322,6 +322,36 @@ class RequisicaoController {
 
     }
 
+    async getStatusAtual(req, res) {
+                
+        try {
+
+            const { id } = req.params;
+            const query = 
+                `SELECT a.status, b.descricao FROM requisicaoRender AS a
+                INNER JOIN tipoStatus AS b ON b.id = a.status AND lang = 'pt'       
+                WHERE a.id = ${id};`;
+
+            const result = await dbConnection.promise().query(query);
+            if ( result.length < 1 ) {
+                res.status(404).json({
+                    message: 'Requisição não encontrada...',
+                    error: error.message
+                });
+            }
+            else {
+                const status = result[0];
+                res.status(200).json({status});
+            }
+            
+        } catch (error) {
+            res.status(500).json({
+                message: 'Erro ao buscar status da Requisição...',
+                error: error.message
+            });
+        }
+    }
+
     async atualizaStatus(req, res) {
 
         try {
@@ -380,7 +410,6 @@ class RequisicaoController {
 
         try {
             
-            console.log(req.body);
             const { idRequisicao, enviadoPor, mensagem } = req.body;
             const query = `INSERT INTO mensagensRequisicao (idRequisicao, enviadoPor, mensagem, dataRegistro)
                 VALUES (?, ?, ?, NOW());`;
