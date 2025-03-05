@@ -138,7 +138,7 @@ class ImageController {
             const [rows] = await dbConnection.promise().query(query);
 
             for (const row of rows) {
-                row.signedUrl = await generateSignedUrl(row.idImagem);
+                row.signedUrl = await generateSignedUrl(bucket, row.idImagem);
             }
             res.status(200).json({
                 rows
