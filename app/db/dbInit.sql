@@ -88,19 +88,10 @@ CREATE TABLE renderizador (
   active BOOLEAN,
   titulo VARCHAR(100),
   localidade VARCHAR(100),
-  site VARCHAR(255);
+  site VARCHAR(255),
   PRIMARY KEY (id),
   FOREIGN KEY (capacidade) REFERENCES capacidadeRenderizador(id)
 );
-
-use renderizaidb;
-ALTER TABLE cliente
-DROP FOREIGN KEY tipo;
-ALTER TABLE cliente
-ADD CONSTRAINT tipo
-FOREIGN KEY (tipo)
-REFERENCES tipoCliente(id);
-
 
 CREATE TABLE equipe (
   id INT AUTO_INCREMENT,
@@ -113,9 +104,9 @@ CREATE TABLE equipeCliente (
   idCliente INT,
   roleCliente INT,
   PRIMARY KEY (idEquipe, idCliente),
-  FOREIGN KEY (idEquipe) REFERENCES equipe(id) ON DELETE RESTRICT,
-  FOREIGN KEY (idCliente) REFERENCES cliente(id) ON DELETE RESTRICT,
-  FOREIGN KEY (roleCliente) REFERENCES tipoRole(id) ON DELETE RESTRICT
+  FOREIGN KEY (idEquipe) REFERENCES equipe(id),
+  FOREIGN KEY (idCliente) REFERENCES cliente(id),
+  FOREIGN KEY (roleCliente) REFERENCES tipoRole(id)
 );
 
 CREATE TABLE equipeRenderizador (
@@ -123,9 +114,9 @@ CREATE TABLE equipeRenderizador (
   idRenderizador INT,
   roleRenderizador INT,
   PRIMARY KEY (idEquipe, idRenderizador),
-  FOREIGN KEY (idEquipe) REFERENCES equipe(id) ON DELETE RESTRICT,
-  FOREIGN KEY (idRenderizador) REFERENCES renderizador(id) ON DELETE RESTRICT,
-  FOREIGN KEY (roleRenderizador) REFERENCES tipoRole(id) ON DELETE RESTRICT
+  FOREIGN KEY (idEquipe) REFERENCES equipe(id),
+  FOREIGN KEY (idRenderizador) REFERENCES renderizador(id),
+  FOREIGN KEY (roleRenderizador) REFERENCES tipoRole(id)
 );
 
 CREATE TABLE requisicaoRender (
@@ -139,7 +130,7 @@ CREATE TABLE requisicaoRender (
   status INT,
   valor decimal(15, 2),
   PRIMARY KEY (id),
-  FOREIGN KEY (status) REFERENCES tipoStatus(id) ON DELETE RESTRICT
+  FOREIGN KEY (status) REFERENCES tipoStatus(id)
 );
 
 CREATE TABLE renderConfig (
@@ -172,8 +163,8 @@ CREATE TABLE mensagensRequisicao (
   idMensagem INT AUTO_INCREMENT,
   idRequisicao INT,
   enviadoPor INT,
-  mensagem varchar(150),
   dataRegistro TIMESTAMP,
+  mensagem varchar(150),
   PRIMARY KEY (idMensagem, idRequisicao),
   FOREIGN KEY (idRequisicao) REFERENCES requisicaoRender(id) ON DELETE CASCADE
 );
