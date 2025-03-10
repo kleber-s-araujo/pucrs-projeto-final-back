@@ -13,13 +13,6 @@ const session = require('express-session');
 const cors = require('cors');
 const app = express();
 
-var corsOptions = {
-  origin: ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
-  credentials: true,  // if you're sending cookies or authentication headers
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "application/json"]
-};
-
 app.use(cors({  
   origin: function (origin, callback) {
     const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001', 'http://127.0.0.1:3001',
@@ -43,19 +36,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rota Master
-app.get("/", (req, res) => {
-  res.json({ message: "Bem Vindo ao Backend!" }); //"dbstatus: `DB ${db.state}.` });
+app.get("/", async (req, res) => {  
+  res.json({ message: "Bem Vindo ao Backend!" });
 });
 
 // Rotas da Aplicação
 require("./routes/dadosMestre.js")(app);
-require("./routes/renderizador.js")(app);
-require("./routes/cliente.js")(app);
-require("./routes/equipe.js")(app);
-require("./routes/requisicao.js")(app);
-require("./routes/dashboard.js")(app);
-require("./routes/images.js")(app);
-require("./routes/contato.js")(app);
+//require("./routes/renderizador.js")(app);
+//require("./routes/cliente.js")(app);
+//require("./routes/equipe.js")(app);
+//require("./routes/requisicao.js")(app);
+//require("./routes/dashboard.js")(app);
+//require("./routes/images.js")(app);
+//require("./routes/contato.js")(app);
 //require("./routes/statuscheck.js")(app);
 
 // set port, listen for requests

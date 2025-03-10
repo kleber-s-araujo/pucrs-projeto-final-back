@@ -12,27 +12,35 @@ module.exports = app => {
 
     // Inicialização dos Objetos
     const express = require('express');
-    const controller = require('../controllers/dadosMestreController');
+    const clientController = require('../controllers/dadosMestreController');
     const { body } = require('express-validator');
     const router = new express.Router();
 
-    // Inicializa tabelas de Dados Mestre
-    router.get('/init', controller.initTabelasDadosMestre);
-
-    // ---> Rotas Tipo Cliente
-    router.get('/tipocliente/', controller.getAllTiposCliente);
-    router.get('/tipocliente/id/:id/lang/:lang', controller.getTipoClienteById);
-    router.get('/tipocliente/lang/:lang', controller.getTiposClienteByLang);
-    /*
-    router.post('/tipocliente',  --> Desativado para não expor
+    // ---> Rotas TIPO CLIENTE  
+    router.get('/tipocliente', clientController.getAllTiposCliente);
+    router.get('/tipocliente/lang/:lang', clientController.getTiposClienteByLang); 
+    router.get('/tipocliente/id/:id/:lang', clientController.getTipoClienteById);
+    router.post('/tipocliente',
         body('id').not().isEmpty().escape(),
         body('idioma').not().isEmpty().escape(),
         body('descricao').not().isEmpty().escape(),
-        controller.createTipoCliente);
-    */
+        clientController.createTipoCliente
+    );
+    router.delete('/tipocliente',
+        body('id').not().isEmpty().escape(),
+        clientController.deleteTipoCliente
+    );
 
-    // ---> Rotas Pacote Renderização
-    router.get('/pacote/', controller.getAllPacotes);
+
+    // ---> Rotas PACOTE RENDERIZAÇÃO
+    router.get('/pacote/', clientController.getAllPacotes);
+
+    /*
+    
+       
+    
+
+    
     router.get('/pacote/id/:id/lang/:lang', controller.getPacoteById);
     router.get('/pacote/lang/:lang', controller.getPacotesByLang);
 
@@ -55,6 +63,7 @@ module.exports = app => {
     router.get('/roles/', controller.getAllRoles);
     router.get('/roles/id/:id/lang/:lang', controller.getRoleById);
     router.get('/roles/lang/:lang', controller.getRolesByLang);
+    */
 
     //Export
     app.use('/api/dadosmestre', router);
