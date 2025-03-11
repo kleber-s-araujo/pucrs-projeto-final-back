@@ -12,38 +12,43 @@ module.exports = app => {
 
     // Inicialização dos Objetos
     const express = require('express');
-    const clientController = require('../controllers/dadosMestreController');
+    const controller = require('../controllers/dadosMestreController');
     const { body } = require('express-validator');
     const router = new express.Router();
 
     // ---> Rotas TIPO CLIENTE  
-    router.get('/tipocliente', clientController.getAllTiposCliente);
-    router.get('/tipocliente/lang/:lang', clientController.getTiposClienteByLang); 
-    router.get('/tipocliente/id/:id/:lang', clientController.getTipoClienteById);
+    router.get('/tipocliente', controller.getAllTiposCliente);
+    router.get('/tipocliente/lang/:lang', controller.getTiposClienteByLang); 
+    router.get('/tipocliente/id/:id/:lang', controller.getTipoClienteById);
     router.post('/tipocliente',
         body('id').not().isEmpty().escape(),
         body('idioma').not().isEmpty().escape(),
         body('descricao').not().isEmpty().escape(),
-        clientController.createTipoCliente
+        controller.createTipoCliente
     );
     router.delete('/tipocliente',
         body('id').not().isEmpty().escape(),
-        clientController.deleteTipoCliente
+        controller.deleteTipoCliente
     );
 
 
     // ---> Rotas PACOTE RENDERIZAÇÃO
-    router.get('/pacote/', clientController.getAllPacotes);
+    router.get('/pacote/', controller.getAllPacotes);
+    router.get('/pacote/id/:id/lang/:lang', controller.getPacoteById);
+    router.get('/pacote/lang/:lang', controller.getPacotesByLang);
+    router.post('/pacote',
+        body('id').not().isEmpty().escape(),
+        body('idioma').not().isEmpty().escape(),
+        body('descricao').not().isEmpty().escape(),
+        controller.createPacote
+    );
+    router.delete('/pacote',
+        body('id').not().isEmpty().escape(),
+        controller.deletePacote
+    );
 
     /*
     
-       
-    
-
-    
-    router.get('/pacote/id/:id/lang/:lang', controller.getPacoteById);
-    router.get('/pacote/lang/:lang', controller.getPacotesByLang);
-
     // ---> Rotas Capacidade Renderizador
     router.get('/capacidade/', controller.getAllCapacidade);
     router.get('/capacidade/id/:id/lang/:lang', controller.getCapacidadeById);

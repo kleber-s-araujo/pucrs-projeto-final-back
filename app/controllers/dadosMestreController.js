@@ -11,7 +11,7 @@
 const { validationResult } = require('express-validator');
 const dbConector = require('../models/db.js');
 
-class clientController {
+class masterController {
 
     /* TIPOS DE CLIENTES :: /api/dadosmestre/tipocliente  */
     async getTiposClienteByLang(req, res) {
@@ -135,13 +135,11 @@ class clientController {
             res.json({ errorMessage: 'Erro ao remover tipo de Cliente:', techError: error.message });
         }
     }
-
     
-    // --> Pacotes
+    /* PACOTES :: /api/dadosmestre/pacote  */
     async getAllPacotes(req, res) {
 
         try {
-            
             //Monta Query
             const query = 'SELECT * FROM pacoteRender ORDER BY lang, id;';
             const pacoteRender = await dbConector.query(query);
@@ -150,51 +148,115 @@ class clientController {
             res.json({ pacoteRender });
 
         } catch (error) {
-            console.error('Error reading Pacotes:', error);
-            throw error;
+            console.error('Erro na leitura dos pacotes de renderização:', error);
+            res.json({ errorMessage: 'Erro na leitura dos pacotes de renderização:', techError: error.message });
         }
     }
-
     
     async getPacoteById(req, res) {
         
         try {
-
             //Recupera Parâmetros da Requisição
             const { id, lang } = req.body;
 
             //Monta Query
             const query = 'SELECT * FROM pacoteRender WHERE id = ? AND lang = ?;';
-            dbConnection.query(query, [req.params.id, req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'pacote': result });
-            });
+            const pacoteRender = await dbConector.query(query);
+
+            //Retorna Resultado
+            res.json({ pacoteRender });
 
         } catch (error) {
-            console.error('Error reading tipoCliente:', error);
-            throw error;
+            console.error('Erro na leitura dos pacotes de renderização:', error);
+            res.json({ errorMessage: 'Erro na leitura dos pacotes de renderização:', techError: error.message });
         }
     };
 
-    /*
-    const getPacotesByLang = async (req, res) => {
+    async getPacotesByLang(req, res) {
 
         try {
+            //Recupera Parâmetros da Requisição
+            const { lang } = req.body;
 
-            console.log(req.params.lang);
+            //Monta Query
             const query = 'SELECT * FROM pacoteRender WHERE lang = ?';
-            dbConnection.query(query, [req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'pacotes': result });
-            });
+            const pacoteRender = await dbConector.query(query);
+
+            //Retorna Resultado
+            res.json({ pacoteRender });
 
         } catch (error) {
-            console.error('Error reading pacoteRender:', error);
-            throw error;
+            console.error('Erro na leitura dos pacotes de renderização:', error);
+            res.json({ errorMessage: 'Erro na leitura dos pacotes de renderização:', techError: error.message });
         }
     };
 
-    
+    async createPacote(req, res) {
+
+        try {
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            //Recupera Parâmetros da Requisição
+            const { id, idioma, descricao } = req.body;
+
+            //Monta Query
+            const query = 'INSERT INTO pacoteRender (id, lang, descricao) VALUES (?, ?, ?);';
+
+            //Executa a transação
+            const conn = await dbConector.getConnection();
+            try {
+                
+                await conn.beginTransaction();
+                const result = await conn.query(query, [id, idioma, descricao]);
+                await conn.commit();
+
+                //Retorna Resultado
+                res.json({ result: result, message: 'Novo tipo de Pacote de Render criado!' });
+
+            } catch (error) {
+                await conn.rollback();
+                throw error;
+            } finally {
+                conn.release();
+            }
+
+        } catch (error) {
+            console.error('Erro ao inserir novo tipo de Pacote de Render:', error);
+            res.json({ errorMessage: 'Erro ao inserir novo tipo de Pacote de Render:', techError: error.message });
+        }
+    }
+
+    async deletePacote(req, res) {
+
+        try {
+            
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            //Recupera Parâmetros da Requisição
+            const { id } = req.body;
+
+            //Monta Query
+            const query = 'DELETE FROM pacoteRender WHERE id = ?';
+            const ret = await dbConector.query(query, [id]);
+
+            //Retorna Resultado
+            res.json({ result: ret, message: `Pacote de Render ${id} removido!` });
+
+        } catch (error) {
+            console.error('Erro ao remover tipo de Pacote de Render:', error);
+            res.json({ errorMessage: 'Erro ao remover tipo de Pacote de Render:', techError: error.message });
+        }
+    }
+
+    /*
     // Capacidade Renderizador
     const getAllCapacidade = async (req, res) => {
 
@@ -392,4 +454,4 @@ class clientController {
     };
     */
 }
-module.exports = new clientController();
+module.exports = new masterController();
