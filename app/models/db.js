@@ -7,6 +7,7 @@
  * @Description: Backend da Aplicação Desenvolvida para o curso de pós-graduação em Desenvolvimento FullStack - PUCRS
  * Este Desenvolvimento via receber requisições e processá-las acessando o Banco de Dados MySQL via Docker
  */
+require('dotenv').config();
 const mysql = require('mysql2/promise');
 const dbConfig = require('../config/db.config.js');
 
@@ -15,11 +16,11 @@ class dbConector {
   constructor() {
     // Cria Pool de conexões com o Banco
     this.pool = mysql.createPool({
-      host: dbConfig.HOST,
-      port: dbConfig.PORT,
-      user: dbConfig.USER,
-      password: dbConfig.PASSWORD,
-      database: dbConfig.DB,
+      host: process.env.HOST,
+      port: process.env.PORT,
+      user: process.env.USER,
+      password: process.env.PASSWORD,
+      database: process.env.DB,
       waitForConnections: true,
       connectionLimit: 10,    // Número máximo de conexões no pool
       queueLimit: 0           // Sem limite para fila (0 = ilimitado)
