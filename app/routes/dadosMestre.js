@@ -47,13 +47,23 @@ module.exports = app => {
         controller.deletePacote
     );
 
-    /*
-    
     // ---> Rotas Capacidade Renderizador
     router.get('/capacidade/', controller.getAllCapacidade);
     router.get('/capacidade/id/:id/lang/:lang', controller.getCapacidadeById);
     router.get('/capacidade/lang/:lang', controller.getCapacidadeByLang);
+    router.post('/capacidade',
+        body('id').not().isEmpty().escape(),
+        body('idioma').not().isEmpty().escape(),
+        body('descricao').not().isEmpty().escape(),
+        controller.createCapacidade
+    );
+    router.delete('/capacidade',
+        body('id').not().isEmpty().escape(),
+        controller.deleteCapacidade
+    );
 
+    /*
+    
     // ---> Rotas Prioridade
     router.get('/prioridade/', controller.getAllPrioridades);
     router.get('/prioridade/id/:id/lang/:lang', controller.getPrioridadeById);

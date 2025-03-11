@@ -26,11 +26,11 @@ class masterController {
             const tipoCliente = await dbConector.query(query, [lang]);
 
             //Retorna Resultado
-            res.json({ tipoCliente });
+            res.status(200).json({ tipoCliente });
 
         } catch (error) {
             console.error('Erro ao buscar os tipos de Clientes:', error.message);
-            res.json({ errorMessage: 'Erro ao buscar os tipos de Clientes:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro ao buscar os tipos de Clientes:', techError: error.message });
         }
     };
 
@@ -42,11 +42,11 @@ class masterController {
             const tipoCliente = await dbConector.query(query);
 
             //Retorna Resultado
-            res.json({ tipoCliente });
+            res.status(200).json({ tipoCliente });
 
         } catch (error) {
             console.error('Erro ao buscar os tipos de Clientes:', error.message);
-            res.json({ errorMessage: 'Erro ao buscar os tipos de Clientes:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro ao buscar os tipos de Clientes:', techError: error.message });
         }
     };
      
@@ -62,11 +62,11 @@ class masterController {
             const tipoCliente = await dbConector.query(query, [id, lang]);
 
             //Retorna Resultado
-            res.json({ tipoCliente });
+            res.status(200).json({ tipoCliente });
 
         } catch (error) {
             console.error('Erro ao buscar os tipos de Clientes:', error.message);
-            res.json({ errorMessage: 'Erro ao buscar os tipos de Clientes:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro ao buscar os tipos de Clientes:', techError: error.message });
         }
     };
 
@@ -95,7 +95,7 @@ class masterController {
                 await conn.commit();
 
                 //Retorna Resultado
-                res.json({ result: result, message: 'Novo tipo de cliente criado!' });
+                res.status(204).json({ result: result, message: 'Novo tipo de cliente criado!' });
 
             } catch (error) {
                 await conn.rollback();
@@ -106,14 +106,13 @@ class masterController {
 
         } catch (error) {
             console.error('Erro ao inserir novo tipo de Cliente:', error);
-            res.json({ errorMessage: 'Erro ao inserir novo tipo de Cliente:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro ao inserir novo tipo de Cliente:', techError: error.message });
         }
     }
 
     async deleteTipoCliente(req, res) {
 
-        try {
-            
+        try {            
             //Verifica se houve erro na requisição
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -128,11 +127,11 @@ class masterController {
             const ret = await dbConector.query(query, [id]);
 
             //Retorna Resultado
-            res.json({ result: ret, message: `Tipo de cliente ${id} removido!` });
+            res.status(200).json({ result: ret, message: `Tipo de cliente ${id} removido!` });
 
         } catch (error) {
             console.error('Erro ao remover tipo de Cliente:', error);
-            res.json({ errorMessage: 'Erro ao remover tipo de Cliente:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro ao remover tipo de Cliente:', techError: error.message });
         }
     }
     
@@ -145,11 +144,11 @@ class masterController {
             const pacoteRender = await dbConector.query(query);
 
             //Retorna Resultado
-            res.json({ pacoteRender });
+            res.status(200).json({ pacoteRender });
 
         } catch (error) {
             console.error('Erro na leitura dos pacotes de renderização:', error);
-            res.json({ errorMessage: 'Erro na leitura dos pacotes de renderização:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro na leitura dos pacotes de renderização:', techError: error.message });
         }
     }
     
@@ -164,11 +163,11 @@ class masterController {
             const pacoteRender = await dbConector.query(query);
 
             //Retorna Resultado
-            res.json({ pacoteRender });
+            res.status(200).json({ pacoteRender });
 
         } catch (error) {
             console.error('Erro na leitura dos pacotes de renderização:', error);
-            res.json({ errorMessage: 'Erro na leitura dos pacotes de renderização:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro na leitura dos pacotes de renderização:', techError: error.message });
         }
     };
 
@@ -183,11 +182,11 @@ class masterController {
             const pacoteRender = await dbConector.query(query);
 
             //Retorna Resultado
-            res.json({ pacoteRender });
+            res.status(200).json({ pacoteRender });
 
         } catch (error) {
             console.error('Erro na leitura dos pacotes de renderização:', error);
-            res.json({ errorMessage: 'Erro na leitura dos pacotes de renderização:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro na leitura dos pacotes de renderização:', techError: error.message });
         }
     };
 
@@ -215,7 +214,7 @@ class masterController {
                 await conn.commit();
 
                 //Retorna Resultado
-                res.json({ result: result, message: 'Novo tipo de Pacote de Render criado!' });
+                res.status(204).json({ result: result, message: 'Novo tipo de Pacote de Render criado!' });
 
             } catch (error) {
                 await conn.rollback();
@@ -226,7 +225,7 @@ class masterController {
 
         } catch (error) {
             console.error('Erro ao inserir novo tipo de Pacote de Render:', error);
-            res.json({ errorMessage: 'Erro ao inserir novo tipo de Pacote de Render:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro ao inserir novo tipo de Pacote de Render:', techError: error.message });
         }
     }
 
@@ -248,64 +247,136 @@ class masterController {
             const ret = await dbConector.query(query, [id]);
 
             //Retorna Resultado
-            res.json({ result: ret, message: `Pacote de Render ${id} removido!` });
+            res.status(200).json({ result: ret, message: `Pacote de Render ${id} removido!` });
 
         } catch (error) {
             console.error('Erro ao remover tipo de Pacote de Render:', error);
-            res.json({ errorMessage: 'Erro ao remover tipo de Pacote de Render:', techError: error.message });
+            res.status(500).json({ errorMessage: 'Erro ao remover tipo de Pacote de Render:', techError: error.message });
+        }
+    }
+    
+    /* CAPACIDADE RENDERIZADOR :: /api/dadosmestre/capacidade  */
+    async getAllCapacidade(req, res) {
+
+        try {
+            //Monta Query
+            const query = 'SELECT * FROM capacidadeRenderizador;';
+            const capacidades = await dbConector.query(query);
+            
+            //Retorna Resultado
+            res.status(200).json({ capacidades });
+
+        } catch (error) {
+            console.error('Erro na leitura de Capacidades Renderizador:', error);
+            res.status(500).json({ errorMessage: 'Erro na leitura das Capacidades Renderizador:', techError: error.message });
+        }
+    }
+
+    async getCapacidadeById(req, res) {
+
+        try {
+            //Recupera Parâmetros da Requisição
+            const { id, lang } = req.params;
+
+            //Monta Query
+            const query = 'SELECT * FROM capacidadeRenderizador WHERE id = ? AND lang = ?;';
+            const capacidade = await dbConector.query(query, [id, lang]);
+
+            //Retorna Resultado
+            res.status(200).json({ capacidade });
+
+        } catch (error) {
+            console.error('Erro na leitura de Capacidade Renderizador:', error);
+            res.status(500).json({ errorMessage: 'Erro na leitura das Capacidades Renderizador:', techError: error.message });
+        }
+    };
+    
+    async getCapacidadeByLang(req, res) {
+
+        try {
+
+            //Recupera Parâmetros da Requisição
+            const { lang } = req.params;
+
+            //Monta Query
+            const query = 'SELECT * FROM capacidadeRenderizador WHERE lang = ?';
+            const capacidade = await dbConector.query(query, [lang])
+
+            //Retorna Resultado
+            res.status(200).json({ capacidade });
+
+        } catch (error) {
+            console.error('Erro na leitura de Capacidade Renderizador:', error);
+            res.status(500).json({ errorMessage: 'Erro na leitura das Capacidades Renderizador:', techError: error.message });
+        }
+    };
+
+    async createCapacidade(req, res) {
+
+        try {
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            //Recupera Parâmetros da Requisição
+            const { id, idioma, descricao } = req.body;
+
+            //Monta Query
+            const query = 'INSERT INTO capacidadeRenderizador (id, lang, descricao) VALUES (?, ?, ?);';
+
+            //Executa a transação
+            const conn = await dbConector.getConnection();
+            try {
+                
+                await conn.beginTransaction();
+                const result = await conn.query(query, [id, idioma, descricao]);
+                await conn.commit();
+
+                //Retorna Resultado
+                res.status(204).json({ result: result, message: 'Nova Capacidade de Renderizador criada!' });
+
+            } catch (error) {
+                await conn.rollback();
+                throw error;
+            } finally {
+                conn.release();
+            }
+
+        } catch (error) {
+            console.error('Erro ao inserir nova Capacidade de Renderizador:', error);
+            res.status(500).json({ errorMessage: 'Erro ao inserir nova Capacidade de Renderizador:', techError: error.message });
+        }
+    }
+
+    async deleteCapacidade(req, res) {
+
+        try {
+            
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            //Recupera Parâmetros da Requisição
+            const { id } = req.body;
+
+            //Monta Query
+            const query = 'DELETE FROM capacidadeRenderizador WHERE id = ?';
+            const ret = await dbConector.query(query, [id]);
+
+            //Retorna Resultado
+            res.status(200).json({ result: ret, message: `Capacidade de Renderizador ${id} removida!` });
+
+        } catch (error) {
+            console.error('Erro ao remover Capacidade de Renderizador:', error);
+            res.status(500).json({ errorMessage: 'Erro ao remover Capacidade de Renderizador:', techError: error.message });
         }
     }
 
     /*
-    // Capacidade Renderizador
-    const getAllCapacidade = async (req, res) => {
-
-        try {
-
-            const query = 'SELECT * FROM capacidadeRenderizador;';
-            dbConnection.query(query, (err, result) => {
-                if (err) throw err;
-                res.json({ 'capacidades': result });
-            });
-
-        } catch (error) {
-            console.error('Error reading Capacidade Renderizador:', error);
-            throw error;
-        }
-    }
-
-    const getCapacidadeById = async (req, res) => {
-
-        try {
-
-            const query = 'SELECT * FROM capacidadeRenderizador WHERE id = ? AND lang = ?;';
-            dbConnection.query(query, [req.params.id, req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'capacidade': result });
-            });
-
-        } catch (error) {
-            console.error('Error reading Capacidade Renderizador:', error);
-            throw error;
-        }
-    };
-
-    const getCapacidadeByLang = async (req, res) => {
-
-        try {
-
-            const query = 'SELECT * FROM capacidadeRenderizador WHERE lang = ?';
-            dbConnection.query(query, [req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'capacidades': result });
-            });
-
-        } catch (error) {
-            console.error('Error reading capacidades:', error);
-            throw error;
-        }
-    };
-
     // Prioridades
     const getAllPrioridades = async (req, res) => {
 
