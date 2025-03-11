@@ -47,7 +47,7 @@ module.exports = app => {
         controller.deletePacote
     );
 
-    // ---> Rotas Capacidade Renderizador
+    // ---> Rotas CAPACIDADE RENDERIZADOR
     router.get('/capacidade/', controller.getAllCapacidade);
     router.get('/capacidade/id/:id/lang/:lang', controller.getCapacidadeById);
     router.get('/capacidade/lang/:lang', controller.getCapacidadeByLang);
