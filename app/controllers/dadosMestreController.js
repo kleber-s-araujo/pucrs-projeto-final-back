@@ -375,57 +375,131 @@ class masterController {
             res.status(500).json({ errorMessage: 'Erro ao remover Capacidade de Renderizador:', techError: error.message });
         }
     }
-
-    /*
-    // Prioridades
-    const getAllPrioridades = async (req, res) => {
+    
+    /* PRIORIDADES :: /api/dadosmestre/prioridade  */
+    async getAllPrioridades(req, res){
 
         try {
 
+            //Monta Query
             const query = 'SELECT * FROM tipoPrioridade;';
-            dbConnection.query(query, (err, result) => {
-                if (err) throw err;
-                res.json({ 'prioridades': result });
-            });
+            const prioridades = await dbConector.query(query);
+
+            //Retorna Resultado
+            res.status(200).json({prioridades});
 
         } catch (error) {
-            console.error('Error reading Prioridades:', error);
-            throw error;
+            console.error('Erro ao listar Prioridades:', error);
+            res.status(500).json({ errorMessage: 'Erro ao listar Prioridades', techError: error.message });
+        }
+    }
+    
+    async getPrioridadeById(req, res) {
+
+        try {
+
+            //Recupera Parâmetros da Requisição
+            const { id, lang } = req.params;
+
+            //Monta Query
+            const query = 'SELECT * FROM tipoPrioridade WHERE id = ? AND lang = ?;';
+            const prioridades = await dbConector.query(query, [id, lang]);
+
+            //Retorna Resultado
+            res.status(200).json({prioridades});
+
+        } catch (error) {
+            console.error('Erro ao listar Prioridades:', error);
+            res.status(500).json({ errorMessage: 'Erro ao listar Prioridades', techError: error.message });
+        }
+    };
+
+    async getPrioridadesByLang(req, res) {
+
+        try {
+
+            //Recupera Parâmetros da Requisição
+            const { lang } = req.params;
+
+            //Monta Query
+            const query = 'SELECT * FROM tipoPrioridade WHERE lang = ?';
+            const prioridades = await dbConector.query(query, [lang]);
+
+            //Retorna Resultado
+            res.status(200).json({ prioridades });
+
+        } catch (error) {
+            console.error('Erro ao listar Prioridades:', error);
+            res.status(500).json({ errorMessage: 'Erro ao listar Prioridades', techError: error.message });
+        }
+    };
+
+    async createPrioridade(req, res) {
+
+        try {
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            //Recupera Parâmetros da Requisição
+            const { id, idioma, descricao } = req.body;
+
+            //Monta Query
+            const query = 'INSERT INTO tipoPrioridade (id, lang, descricao) VALUES (?, ?, ?);';
+
+            //Executa a transação
+            const conn = await dbConector.getConnection();
+            try {
+                
+                await conn.beginTransaction();
+                const result = await conn.query(query, [id, idioma, descricao]);
+                await conn.commit();
+
+                //Retorna Resultado
+                res.status(204).json({ result: result, message: 'Novo tipo de Prioridade criado!' });
+
+            } catch (error) {
+                await conn.rollback();
+                throw error;
+            } finally {
+                conn.release();
+            }
+
+        } catch (error) {
+            console.error('Erro ao inserir nova Prioridade:', error);
+            res.status(500).json({ errorMessage: 'Erro ao inserir nova Prioridade', techError: error.message });
         }
     }
 
-    const getPrioridadeById = async (req, res) => {
+    async deletePrioridade(req, res) {
 
         try {
+            
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
 
-            const query = 'SELECT * FROM capacidadeRenderizador WHERE id = ? AND lang = ?;';
-            dbConnection.query(query, [req.params.id, req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'prioridade': result });
-            });
+            //Recupera Parâmetros da Requisição
+            const { id } = req.body;
 
-        } catch (error) {
-            console.error('Error reading Prioridade:', error);
-            throw error;
-        }
-    };
+            //Monta Query
+            const query = 'DELETE FROM tipoPrioridade WHERE id = ?';
+            const ret = await dbConector.query(query, [id]);
 
-    const getPrioridadesByLang = async (req, res) => {
-
-        try {
-
-            const query = 'SELECT * FROM pacoteRender WHERE lang = ?';
-            dbConnection.query(query, [req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'prioridades': result });
-            });
+            //Retorna Resultado
+            res.status(200).json({ result: ret, message: `Tipo de Prioridade ${id} removida!` });
 
         } catch (error) {
-            console.error('Error reading Prioridades:', error);
-            throw error;
+            console.error('Erro ao remover Tipo de Prioridade:', error);
+            res.status(500).json({ errorMessage: 'Erro ao remover Tipo de Prioridade', techError: error.message });
         }
-    };
+    }
 
+    /*
     // Status
     const getAllStatus = async (req, res) => {
 

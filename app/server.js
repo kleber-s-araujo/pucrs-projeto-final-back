@@ -9,18 +9,16 @@
  */
 require('dotenv').config();
 const express = require('express');
-const session = require('express-session');
 const cors = require('cors');
 const app = express();
 
 app.use(cors({  
   origin: function (origin, callback) {
-    const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001', 'http://127.0.0.1:3001',
-                            'http://34.118.230.251:3000', 'http://34.118.230.251:3001'];
+    const allowedOrigins = process.env.CORS_ALLWD
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('Requisição não permitida pelas políticas do CORS!'));
     }
   },
   credentials: true,
@@ -49,11 +47,9 @@ require("./routes/dadosMestre.js")(app);
 //require("./routes/dashboard.js")(app);
 //require("./routes/images.js")(app);
 //require("./routes/contato.js")(app);
-//require("./routes/statuscheck.js")(app);
 
 // set port, listen for requests
-//const PORT = process.env.PORT || 3030;
-const PORT = 3030;
+const PORT = process.env.SERVER_PORT || 3030;
 app.listen(PORT, () => {
   console.log(`Server executando na porta ${PORT}.`);
 });
