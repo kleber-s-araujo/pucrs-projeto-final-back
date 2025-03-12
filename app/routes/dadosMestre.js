@@ -91,13 +91,21 @@ module.exports = app => {
         body('id').not().isEmpty().escape(),
         controller.deleteStatus
     );
-
-    /*
+    
     //Rotas Roles
-    router.get('/roles/', controller.getAllRoles);
+    router.get('/roles', controller.getAllRoles);
     router.get('/roles/id/:id/lang/:lang', controller.getRoleById);
     router.get('/roles/lang/:lang', controller.getRolesByLang);
-    */
+    router.post('/roles',
+        body('id').not().isEmpty().escape(),
+        body('idioma').not().isEmpty().escape(),
+        body('descricao').not().isEmpty().escape(),
+        controller.createStatus
+    );
+    router.delete('/roles',
+        body('id').not().isEmpty().escape(),
+        controller.deleteStatus
+    );
 
     //Export
     app.use('/api/dadosmestre', router);
