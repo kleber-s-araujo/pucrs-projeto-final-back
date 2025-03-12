@@ -546,7 +546,7 @@ class masterController {
 
             //Monta Query
             const query = 'SELECT * FROM tipoStatus WHERE lang = ?;';
-            const status = dbConector.query(query, [lang]);
+            const status = await dbConector.query(query, [lang]);
 
             //Retorna Resultados
             res.status(200).json({ status });
@@ -621,18 +621,58 @@ class masterController {
             res.status(500).json({ errorMessage: 'Erro ao remover Status', techError: error.message });
         }
     }
-
-    /*
-    // Roles
-    const getAllRoles = async (req, res) => {
+    
+    /* ROLES :: /api/dadosmestre/roles */
+    async getAllRoles(req, res) {
 
         try {
 
+            //Monta Query
             const query = 'SELECT * FROM tipoRole;';
-            dbConnection.query(query, (err, result) => {
-                if (err) throw err;
-                res.json({ 'roles': result });
-            });
+            const roles = await dbConector.query(query);
+
+            //Retorna Resultado
+            res.json({ roles });
+
+        } catch (error) {
+            console.error('Erro ao listar Roles:', error);
+            res.status(500).json({ errorMessage: 'Erro ao listar Roles', techError: error.message });
+        }
+    }
+
+    async getRoleById(req, res) {
+
+        try {
+
+            //Recupera Parâmetros
+            const { id, lang } = req.params;
+
+            //Monta Query
+            const query = 'SELECT * FROM tipoRole WHERE id = ? AND lang = ?;';
+            const role = await dbConector.query(query, [id, lang]);
+
+            //Retorna Resultado
+            res.status(200).json({ role });
+
+        } catch (error) {
+            console.error('Erro ao listar Role:', error);
+            res.status(500).json({ errorMessage: 'Erro ao listar Role', techError: error.message });
+        }
+    }
+
+    async getRolesByLang(req, res) {
+
+        try {
+            
+            //Recupera Parâmetros
+            const { lang } = req.params;
+
+            //Monta Query
+            const query = 'SELECT * FROM tipoRole WHERE lang = ?';
+            const roles = await dbConector.query(query, [lang]);
+
+            //Retorna Resultados
+            res.json({ 'roles': result });
 
         } catch (error) {
             console.error('Error reading Roles:', error);
@@ -640,37 +680,70 @@ class masterController {
         }
     }
 
-    const getRoleById = async (req, res) => {
+    async createRole(req, res) {
 
         try {
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
 
-            const query = 'SELECT * FROM tipoRole WHERE id = ? AND lang = ?;';
-            dbConnection.query(query, [req.params.id, req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'role': result });
-            });
+            //Recupera Parâmetros da Requisição
+            const { id, idioma, descricao } = req.body;
+
+            //Monta Query
+            const query = 'INSERT INTO tipoRole (id, lang, descricao) VALUES (?, ?, ?);';
+
+            //Executa a transação
+            const conn = await dbConector.getConnection();
+            try {
+                
+                await conn.beginTransaction();
+                const result = await conn.query(query, [id, idioma, descricao]);
+                await conn.commit();
+
+                //Retorna Resultado
+                res.status(204).json({ result: result, message: 'Nova Role criada!' });
+
+            } catch (error) {
+                await conn.rollback();
+                throw error;
+            } finally {
+                conn.release();
+            }
 
         } catch (error) {
-            console.error('Error reading Role:', error);
-            throw error;
+            console.error('Erro ao inserir nova Role:', error);
+            res.status(500).json({ errorMessage: 'Erro ao inserir nova Role', techError: error.message });
         }
-    };
+    }
 
-    const getRolesByLang = async (req, res) => {
+    async deleteRole (req, res) {
 
         try {
+            
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
 
-            const query = 'SELECT * FROM tipoRole WHERE lang = ?';
-            dbConnection.query(query, [req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'roles': result });
-            });
+            //Recupera Parâmetros da Requisição
+            const { id } = req.body;
+
+            //Monta Query
+            const query = 'DELETE FROM tipoRole WHERE id = ?';
+            const ret = await dbConector.query(query, [id]);
+
+            //Retorna Resultado
+            res.status(200).json({ result: ret, message: `Role ${id} removida!` });
 
         } catch (error) {
-            console.error('Error reading Roles:', error);
-            throw error;
+            console.error('Erro ao remover Role:', error);
+            res.status(500).json({ errorMessage: 'Erro ao remover Role', techError: error.message });
         }
-    };
-    */
+    }
+
 }
 module.exports = new masterController();

@@ -7,7 +7,7 @@
  */
 
 const { validationResult } = require('express-validator');
-const dbConnection = require('../models/db.js').default;
+const dbConnection = require('../models/db.js');
 const imageController = require('./imageController.js');
 const { Storage } = require('@google-cloud/storage');
 const storage = new Storage({
