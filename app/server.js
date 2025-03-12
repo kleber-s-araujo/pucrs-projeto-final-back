@@ -46,7 +46,7 @@ require("./routes/dadosMestre.js")(app);
 //require("./routes/requisicao.js")(app);
 //require("./routes/dashboard.js")(app);
 //require("./routes/images.js")(app);
-//require("./routes/contato.js")(app);
+require("./routes/contato.js")(app);
 
 // set port, listen for requests
 const PORT = process.env.SERVER_PORT || 3030;

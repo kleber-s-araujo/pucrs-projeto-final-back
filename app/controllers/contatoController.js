@@ -6,9 +6,9 @@
  * Este Desenvolvimento via receber requisições e processá-las acessando o Banco de Dados MySQL via Docker
  */
 
-const dbConnection = require('../models/db.js');
 const { validationResult } = require('express-validator');
 const { sendEmail } = require('./mailer.js');
+const dbConector = require('../models/db.js');
 
 const getEmailContent = (nome, assunto) => {
     return `
@@ -43,70 +43,114 @@ const getEmailContentTrabalhe = (nome) => {
 
 class contatoController {
 
-    //Salvar Contato em BD
-    async postContato(req, res) {
+    /* SOLICITACAO DE CONTATO :: /api/contato/mensagem */
+    async createContato(req, res) {
 
-        //Verifica Validações de Entrada
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) 
-            return res.status(400).json({ errors: errors.array() });
-        
-        console.log(req.body);
+        try {
 
-        //Recebe os Parâmetros
-        const { nome, email, assunto, telefone, mensagem } = req.body;
-        const params = [nome, email, assunto, telefone, mensagem];
-        
-        //Monta a Query e Executa
-        const query = `INSERT INTO contato (nome, email, assunto, telefone, mensagem, statusContato)
-                       VALUES (?,?,?,?,?,'Aberto');`;
-        const result = await dbConnection.promise().query(query, params);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                message: 'Erro ao Inserir nova solicitação de Contato'
-            });
+            //Verifica Entrada
+            const errors = validationResult(req);
+            if (!errors.isEmpty())
+                return res.status(400).json({
+                    errors: errors.array()
+                });
+
+            //Recupera os Parâmetros
+            const { nome, email, assunto, telefone, mensagem } = req.body;
+            const params = [nome, email, assunto, telefone, mensagem];
+
+            //Monta a Query
+            const query = `INSERT INTO contato (nome, email, assunto, telefone, mensagem, statusContato)
+                           VALUES (?,?,?,?,?,'Aberto');`;
+
+            //Executa a transação
+            const conn = await dbConector.getConnection();
+            try {
+
+                await conn.beginTransaction();
+                const result = await conn.query(query, params);
+                await conn.commit();
+
+                //Envia Email de Confirmação
+                const subject = 'Solicitação de Contato: ' + assunto;
+                const text = getEmailContent(nome, assunto);
+                await sendEmail(email, subject, text);
+                res.status(204).json({
+                    message: 'Solicitação de Contato criada com Sucesso!',
+                    result: result.affectedRows
+                });
+
+            } catch (error) {
+                await conn.rollback();
+                throw error;
+            }
+            finally {
+                conn.release();
+            }
+
+        } catch (error) {
+            console.error('Erro ao inserir Solicitação de Contato:', error);
+            res.status(500).json({ errorMessage: 'Erro ao inserir Solicitação de Contato:', techError: error.message });
         }
-
-        const subject = 'Solicitação de Contato: ' + assunto; 
-        const text = getEmailContent(nome, assunto);
-        await sendEmail(email, subject, text);
-        res.status(200).json({
-            message: 'Solicitação de Contato criada com Sucesso!',
-            result: result.affectedRows
-        });
     }
 
-    //Salvar Contato em BD
-    async postTrabalheConosco(req, res) {
+    /* SOLICITACAO TRABALHE CONOSCO :: /api/contato/trabalhe */
+    async createTrabalheConosco(req, res) {
 
-        //Verifica Validações de Entrada
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) 
-            return res.status(400).json({ errors: errors.array() });
-        
-        console.log(req.body);
+        try {
 
-        //Recebe os Parâmetros
-        const { nome, email, especialidade, telefone, links, mensagem } = req.body;
-        const params = [nome, email, especialidade, telefone, links, mensagem];
-        
-        //Monta a Query e Executa
-        const query = `INSERT INTO trabalhe (nome, email, especialidade, telefone, links, mensagem, statusContato)
-                       VALUES (?,?,?,?,?,?,'Aberto');`;
-        const result = await dbConnection.promise().query(query, params);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                message: 'Erro ao Inserir Solicitação de Trabalho'
+            //Verifica Validações de Entrada
+            const errors = validationResult(req);
+            if (!errors.isEmpty())
+                return res.status(400).json({ errors: errors.array() });
+
+            //Recebe os Parâmetros
+            const { nome, email, especialidade, telefone, links, mensagem } = req.body;
+            const params = [nome, email, especialidade, telefone, links, mensagem];
+
+            //Monta a Query e Executa
+            const query = `INSERT INTO trabalhe (nome, email, especialidade, telefone, links, mensagem, statusContato)
+                           VALUES (?,?,?,?,?,?,'Aberto');`;
+
+            //Executa a transação
+            const conn = await dbConector.getConnection();
+            try {
+
+                await conn.beginTransaction();
+                const result = await conn.query(query, params);
+                await conn.commit();
+
+                
+
+            } catch (error) {
+                await conn.rollback();
+                throw error;
+            }
+            finally {
+                conn.release();
+            }
+
+
+
+            const result = await dbConnection.promise().query(query, params);
+            if (result.affectedRows === 0) {
+                return res.status(404).json({
+                    message: 'Erro ao Inserir Solicitação de Trabalho'
+                });
+            }
+
+            const subject = 'Trabalhe Conosco: ' + nome;
+            const text = getEmailContentTrabalhe(nome);
+            await sendEmail(email, subject, text);
+            res.status(200).json({
+                message: 'Solicitação de Contato criada com Sucesso!',
+                result: result.affectedRows
             });
-        }
 
-        const subject = 'Trabalhe Conosco: ' + nome; 
-        const text = getEmailContentTrabalhe(nome);
-        await sendEmail(email, subject, text);
-        res.status(200).json({
-            message: 'Solicitação de Contato criada com Sucesso!',
-            result: result.affectedRows
-        });
+        } catch (error) {
+            console.error('Erro ao inserir Solicitação de Contato:', error);
+            res.status(500).json({ errorMessage: 'Erro ao inserir Solicitação de Contato:', techError: error.message });
+        }
     }
 }
 
