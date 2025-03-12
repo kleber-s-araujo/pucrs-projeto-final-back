@@ -62,7 +62,7 @@ module.exports = app => {
         controller.deleteCapacidade
     );
 
-    // ---> Rotas Prioridade
+    // ---> Rotas PRIORIDADE
     router.get('/prioridade', controller.getAllPrioridades);
     router.get('/prioridade/id/:id/lang/:lang', controller.getPrioridadeById);
     router.get('/prioridade/lang/:lang', controller.getPrioridadesByLang);
@@ -77,15 +77,22 @@ module.exports = app => {
         controller.deletePrioridade
     );
     
-    
-    
-    /*
-
-    //Rotas Status
-    router.get('/status/', controller.getAllStatus);
+    // ---> Rotas STATUS
+    router.get('/status', controller.getAllStatus);
     router.get('/status/id/:id/lang/:lang', controller.getStatusById);
     router.get('/status/lang/:lang', controller.getStatusByLang);
+    router.post('/status',
+        body('id').not().isEmpty().escape(),
+        body('idioma').not().isEmpty().escape(),
+        body('descricao').not().isEmpty().escape(),
+        controller.createStatus
+    );
+    router.delete('/status',
+        body('id').not().isEmpty().escape(),
+        controller.deleteStatus
+    );
 
+    /*
     //Rotas Roles
     router.get('/roles/', controller.getAllRoles);
     router.get('/roles/id/:id/lang/:lang', controller.getRoleById);

@@ -498,57 +498,131 @@ class masterController {
             res.status(500).json({ errorMessage: 'Erro ao remover Tipo de Prioridade', techError: error.message });
         }
     }
-
-    /*
-    // Status
-    const getAllStatus = async (req, res) => {
+    
+    /* STATUS :: /api/dadosmestre/status */
+    async getAllStatus(req, res) {
 
         try {
 
+            //Monta Query
             const query = 'SELECT * FROM tipoStatus;';
-            dbConnection.query(query, (err, result) => {
-                if (err) throw err;
-                res.json({ 'status': result });
-            });
+            const status = await dbConector.query(query);
+
+            //Retorna Resultado
+            res.status(200).json({ status });
 
         } catch (error) {
-            console.error('Error reading Status:', error);
-            throw error;
+            console.error('Erro ao listar Status:', error);
+            res.status(500).json({ errorMessage: 'Erro ao listar Status', techError: error.message });
         }
     }
 
-    const getStatusById = async (req, res) => {
+    async getStatusById(req, res) {
 
         try {
 
+            //Recupera Parâmetros
+            const { id, lang } = req.params;
+
+            //Monta Query
             const query = 'SELECT * FROM tipoStatus WHERE id = ? AND lang = ?;';
-            dbConnection.query(query, [req.params.id, req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'status': result });
-            });
+            const status = await dbConector.query(query, [id, lang]);
+
+            //Retorna Resultados
+            res.status(200).json({ status });
 
         } catch (error) {
-            console.error('Error reading Status:', error);
-            throw error;
+            console.error('Erro ao listar Status:', error);
+            res.status(500).json({ errorMessage: 'Erro ao listar Status', techError: error.message });
         }
     };
 
-    const getStatusByLang = async (req, res) => {
+    async getStatusByLang(req, res) {
 
         try {
 
-            const query = 'SELECT * FROM tipoStatus WHERE lang = ?';
-            dbConnection.query(query, [req.params.lang], (err, result) => {
-                if (err) throw err;
-                res.json({ 'status': result });
-            });
+            //Recupera Parâmetros
+            const { lang } = req.params;
+
+            //Monta Query
+            const query = 'SELECT * FROM tipoStatus WHERE lang = ?;';
+            const status = dbConector.query(query, [lang]);
+
+            //Retorna Resultados
+            res.status(200).json({ status });
 
         } catch (error) {
-            console.error('Error reading Status:', error);
-            throw error;
+            console.error('Erro ao listar Status:', error);
+            res.status(500).json({ errorMessage: 'Erro ao listar Status', techError: error.message });
         }
     };
 
+    async createStatus(req, res) {
+
+        try {
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            //Recupera Parâmetros da Requisição
+            const { id, idioma, descricao } = req.body;
+
+            //Monta Query
+            const query = 'INSERT INTO tipoStatus (id, lang, descricao) VALUES (?, ?, ?);';
+
+            //Executa a transação
+            const conn = await dbConector.getConnection();
+            try {
+                
+                await conn.beginTransaction();
+                const result = await conn.query(query, [id, idioma, descricao]);
+                await conn.commit();
+
+                //Retorna Resultado
+                res.status(204).json({ result: result, message: 'Novo tipo de Status criado!' });
+
+            } catch (error) {
+                await conn.rollback();
+                throw error;
+            } finally {
+                conn.release();
+            }
+
+        } catch (error) {
+            console.error('Erro ao inserir novo Status:', error);
+            res.status(500).json({ errorMessage: 'Erro ao inserir novo Status', techError: error.message });
+        }
+    }
+
+    async deleteStatus(req, res) {
+
+        try {
+            
+            //Verifica se houve erro na requisição
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+
+            //Recupera Parâmetros da Requisição
+            const { id } = req.body;
+
+            //Monta Query
+            const query = 'DELETE FROM tipoStatus WHERE id = ?';
+            const ret = await dbConector.query(query, [id]);
+
+            //Retorna Resultado
+            res.status(200).json({ result: ret, message: `Status ${id} removido!` });
+
+        } catch (error) {
+            console.error('Erro ao remover Status:', error);
+            res.status(500).json({ errorMessage: 'Erro ao remover Status', techError: error.message });
+        }
+    }
+
+    /*
     // Roles
     const getAllRoles = async (req, res) => {
 
