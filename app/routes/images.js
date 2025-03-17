@@ -9,8 +9,7 @@ module.exports = app => {
 
     // Inicialização dos Objetos
     const express = require('express');
-    const multer = require('multer');
-    const { body } = require('express-validator');
+    const multer = require('multer');    
     const router = new express.Router();
     const controller = require('../controllers/imageController');
 

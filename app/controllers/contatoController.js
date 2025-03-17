@@ -120,7 +120,13 @@ class contatoController {
                 const result = await conn.query(query, params);
                 await conn.commit();
 
-                
+                const subject = 'Trabalhe Conosco: ' + nome;
+                const text = getEmailContentTrabalhe(nome);
+                await sendEmail(email, subject, text);
+                res.status(200).json({
+                    message: 'Solicitação de Contato criada com Sucesso!',
+                    result: result.affectedRows
+                });
 
             } catch (error) {
                 await conn.rollback();
@@ -129,23 +135,6 @@ class contatoController {
             finally {
                 conn.release();
             }
-
-
-
-            const result = await dbConnection.promise().query(query, params);
-            if (result.affectedRows === 0) {
-                return res.status(404).json({
-                    message: 'Erro ao Inserir Solicitação de Trabalho'
-                });
-            }
-
-            const subject = 'Trabalhe Conosco: ' + nome;
-            const text = getEmailContentTrabalhe(nome);
-            await sendEmail(email, subject, text);
-            res.status(200).json({
-                message: 'Solicitação de Contato criada com Sucesso!',
-                result: result.affectedRows
-            });
 
         } catch (error) {
             console.error('Erro ao inserir Solicitação de Contato:', error);

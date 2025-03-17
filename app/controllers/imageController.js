@@ -7,14 +7,14 @@
  */
 
 const { validationResult } = require('express-validator');
-const dbConnection = require('../models/db.js');
+const dbConnector = require('../models/db.js');
 
 const { Storage } = require('@google-cloud/storage');
 const storage = new Storage({
-    keyFilename: './acc_keys/vertical-set-449223-s3-4ac4029eb1e4.json',
-    projectId: 'vertical-set-449223-s3'
+    keyFilename: `./acc_keys/${process.env.STORAGE_KEYFILENAME}`,
+    projectId: process.env.STORAGE_PROJECT
 });
-const bucketName = 'renderizai-portifolio';
+const bucketName = process.env.STORAGE_BKTPORT;
 const bucket = storage.bucket(bucketName);
 
 async function generateSignedUrl(bucket, fileName) {
@@ -43,9 +43,9 @@ async function generateSignedUrl(bucket, fileName) {
 async function storeImageData(imageName, renderizador, titulo) {
     try {
         
-        const query = `INSERT INTO portifolio (idImagem, idRenderizador, titulo) VALUES (?,?,?)`;
-        const ret = dbConnection.promise().query(query, [imageName,renderizador,titulo]);
-        return ret;
+        //Monta Query
+        const query = `INSERT INTO portifolio (idImagem, idRenderizador, titulo) VALUES (?,?,?);`;       
+        return await dbConnector.query(query, [imageName,renderizador,titulo]);
 
     } catch (error) {
         console.error('Erro ao gravar Imagem no BD:', error);
@@ -135,7 +135,7 @@ class ImageController {
             const query = `SELECT p.*, r.nome FROM portifolio p
                            INNER JOIN renderizador r ON r.id = p.idRenderizador
                            LIMIT ${max};`;
-            const [rows] = await dbConnection.promise().query(query);
+            const [rows] = await dbConnector.query(query);
 
             for (const row of rows) {
                 row.signedUrl = await generateSignedUrl(bucket, row.idImagem);

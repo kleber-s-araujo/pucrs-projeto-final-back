@@ -95,7 +95,7 @@ class masterController {
                 await conn.commit();
 
                 //Retorna Resultado
-                res.status(204).json({ result: result, message: 'Novo tipo de cliente criado!' });
+                res.status(201).json({ result: result, message: 'Novo tipo de cliente criado!' });
 
             } catch (error) {
                 await conn.rollback();
@@ -214,7 +214,7 @@ class masterController {
                 await conn.commit();
 
                 //Retorna Resultado
-                res.status(204).json({ result: result, message: 'Novo tipo de Pacote de Render criado!' });
+                res.status(201).json({ result: result, message: 'Novo tipo de Pacote de Render criado!' });
 
             } catch (error) {
                 await conn.rollback();
@@ -335,7 +335,7 @@ class masterController {
                 await conn.commit();
 
                 //Retorna Resultado
-                res.status(204).json({ result: result, message: 'Nova Capacidade de Renderizador criada!' });
+                res.status(201).json({ result: result, message: 'Nova Capacidade de Renderizador criada!' });
 
             } catch (error) {
                 await conn.rollback();
@@ -458,7 +458,7 @@ class masterController {
                 await conn.commit();
 
                 //Retorna Resultado
-                res.status(204).json({ result: result, message: 'Novo tipo de Prioridade criado!' });
+                res.status(201).json({ result: result, message: 'Novo tipo de Prioridade criado!' });
 
             } catch (error) {
                 await conn.rollback();
@@ -581,7 +581,7 @@ class masterController {
                 await conn.commit();
 
                 //Retorna Resultado
-                res.status(204).json({ result: result, message: 'Novo tipo de Status criado!' });
+                res.status(201).json({ result: result, message: 'Novo tipo de Status criado!' });
 
             } catch (error) {
                 await conn.rollback();
@@ -704,7 +704,7 @@ class masterController {
                 await conn.commit();
 
                 //Retorna Resultado
-                res.status(204).json({ result: result, message: 'Nova Role criada!' });
+                res.status(201).json({ result: result, message: 'Nova Role criada!' });
 
             } catch (error) {
                 await conn.rollback();

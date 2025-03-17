@@ -21,7 +21,7 @@ module.exports = app => {
         body('assunto').notEmpty().withMessage('Informar o Assunto'),
         body('telefone').notEmpty().withMessage('Informar o Telefone'),
         body('mensagem').notEmpty().withMessage('Informar a Mensagem'),
-        controller.postContato
+        controller.createContato
     );
 
     router.post('/trabalhe',
@@ -31,7 +31,7 @@ module.exports = app => {
         body('telefone').notEmpty().withMessage('Informar o Telefone'),
         body('links').notEmpty().withMessage('Informar Links'),
         body('mensagem').notEmpty().withMessage('Informar a Mensagem'),
-        controller.postTrabalheConosco
+        controller.createTrabalheConosco
     );
 
     //Export
