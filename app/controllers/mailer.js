@@ -1,13 +1,12 @@
 require('dotenv').config();
 const nodemailer = require('nodemailer');
-const dbConfig = require('../config/db.config.js');
 
 /* Configura o Transporter */
 const transporter = nodemailer.createTransport({
-    service: dbConfig.EMAIL_SERVICE,
+    service: process.env.EMAIL_SERVICE,
     auth: {
-        user: dbConfig.EMAIL_USER,
-        pass: dbConfig.EMAIL_PASS
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     },
     debug: true // Ativa logs detalhados
 });
@@ -18,7 +17,7 @@ transporter.set('socket_timeout', 15000);
 /* Método para Enviar Email */
 const sendEmail = async (to, subject, text) => {
     const mailOptions = {
-        from: dbConfig.EMAIL_USER,
+        from: process.env.EMAIL_USER,
         to: to,
         subject: subject,
         html: text

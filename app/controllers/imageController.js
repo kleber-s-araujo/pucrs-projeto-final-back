@@ -5,7 +5,6 @@
  * @Description: Backend da Aplicação Desenvolvida para o curso de pós-graduação em Desenvolvimento FullStack - PUCRS
  * Este Desenvolvimento via receber requisições e processá-las acessando o Banco de Dados MySQL via Docker
  */
-
 const { validationResult } = require('express-validator');
 const dbConnector = require('../models/db.js');
 
@@ -14,7 +13,7 @@ const storage = new Storage({
     keyFilename: `./acc_keys/${process.env.STORAGE_KEYFILENAME}`,
     projectId: process.env.STORAGE_PROJECT
 });
-const bucketName = process.env.STORAGE_BKTPORT;
+const bucketName = 'renderizai-portifolio'; //process.env.STORAGE_BKTPORT;
 const bucket = storage.bucket(bucketName);
 
 async function generateSignedUrl(bucket, fileName) {
@@ -135,11 +134,13 @@ class ImageController {
             const query = `SELECT p.*, r.nome FROM portifolio p
                            INNER JOIN renderizador r ON r.id = p.idRenderizador
                            LIMIT ${max};`;
-            const [rows] = await dbConnector.query(query);
+            const rows = await dbConnector.query(query);
 
+            console.log(rows);
             for (const row of rows) {
                 row.signedUrl = await generateSignedUrl(bucket, row.idImagem);
             }
+            console.log("Imagens: ", rows);
             res.status(200).json({
                 rows
             });

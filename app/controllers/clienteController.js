@@ -5,7 +5,7 @@
  * @Description: Backend da Aplicação Desenvolvida para o curso de pós-graduação em Desenvolvimento FullStack - PUCRS
  * Este Desenvolvimento via receber requisições e processá-las acessando o Banco de Dados MySQL via Docker
  */
-
+require('dotenv').config();
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { validationResult, param } = require('express-validator');
@@ -13,10 +13,11 @@ const dbConector = require('../models/db.js');
 const { Storage } = require('@google-cloud/storage');
 const imageController = require('./imageController.js');
 const storage = new Storage({
-    keyFilename: `./acc_keys/${STORAGE_KEYFILENAME}`,
+    keyFilename: `./acc_keys/${process.env.STORAGE_KEYFILENAME}`,
     projectId: process.env.STORAGE_PROJECT
 });
-const bucketName = process.env.STORAGE_BKTPROF;
+const bucketName = 'renderizai-profile'; //process.env.STORAGE_BKTPROF;
+console.log(bucketName);
 const bucket = storage.bucket(bucketName);
 
 async function storeClientImage(imageName, id) {

@@ -26,6 +26,9 @@ class dbConector {
       connectionLimit: 10,    // Número máximo de conexões no pool
       queueLimit: 0           // Sem limite para fila (0 = ilimitado)
     });
+
+    this.verificaConexao();
+
   }
 
   async getConnection() {
