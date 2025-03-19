@@ -73,7 +73,6 @@ class masterController {
     async createTipoCliente(req, res) {
 
         try {
-
             //Verifica se houve erro na requisição
             const errors = validationResult(req);
             if (!errors.isEmpty()) {

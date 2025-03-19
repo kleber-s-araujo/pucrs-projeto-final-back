@@ -9,18 +9,19 @@
  */
 require('dotenv').config();
 const mysql = require('mysql2/promise');
-const dbConfig = require('../config/db.config.js');
+const { MongoClient, ObjectId } = require('mongodb');
 
 class dbConector {
 
   constructor() {
-    // Cria Pool de conexões com o Banco
+
+    // Cria Pool de conexões com o Banco MYSQL
     this.pool = mysql.createPool({
-      host: process.env.HOST,
-      port: process.env.PORT,
-      user: process.env.USER,
-      password: process.env.PASSWORD,
-      database: process.env.DB,
+      host: process.env.MYSQL_HOST,
+      port: process.env.MYSQL_PORT,
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASS,
+      database: process.env.MYSQL_DB,
       waitForConnections: true,
       connectionLimit: 10,    // Número máximo de conexões no pool
       queueLimit: 0           // Sem limite para fila (0 = ilimitado)

@@ -29,7 +29,7 @@ module.exports = app => {
     router.post('/', 
         body('nome').not().isEmpty().escape(), 
         body('email').isEmail().escape(),
-        body('senha'), //.isStrongPassword().escape(),
+        body('senha'),
         controller.createRenderizador);
     
     router.get('/id/:id/:lang', controller.getRenderizadorById);

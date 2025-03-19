@@ -128,8 +128,7 @@ class RequisicaoController {
     async getAll(req, res) {
         try {
 
-            const query = `
-                SELECT * FROM requisicaoRender;`
+            const query = `SELECT * FROM requisicaoRender;`;
             const [rows] = await dbConnection.promise().query(query);
             res.json(rows);
 
