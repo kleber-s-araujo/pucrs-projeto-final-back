@@ -27,6 +27,15 @@ class dbConector {
       queueLimit: 0           // Sem limite para fila (0 = ilimitado)
     });
 
+    const mongoUri = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}?authSource=admin`;
+    this.mongoClient = new MongoClient(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      connectTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 5000
+    });
+    
+    this.mongoConnected = false;
     this.verificaConexao();
 
   }
@@ -43,14 +52,42 @@ class dbConector {
   async verificaConexao() {
 
     try {
+
+      //MySQL
       const connection = await this.pool.getConnection();
       const [rows] = await connection.query('SELECT 1 AS result');
       connection.release();
-      console.log('Pool de conexões está ativo');
+      console.log('Pool de conexões MYSQL está ativo!');
+
+      //Mongo
+      if (!this.mongoConnected)
+        await this.mongoConnect();
+
       return true;
+
     } catch (error) {
-      console.error('Erro ao verificar conexão:', error);
+      console.error('Erro ao verificar conexões:', error);
       return false;
+    }
+  }
+
+  async mongoConnect() {
+
+    try {
+      
+      await this.mongoClient.connect();
+      this.db = this.mongoClient.db(process.env.MONGO_DB);
+      this.mongoConnected = true;      
+      console.log('Conexão com MongoDB estabelecida com sucesso!');
+
+      return true;
+
+    } catch (error) {
+
+      console.error('Erro ao conectar com MongoDB:', error);
+      this.mongoConnected = false;
+      throw error;
+
     }
   }
 
