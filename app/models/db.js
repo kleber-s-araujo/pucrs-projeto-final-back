@@ -62,7 +62,8 @@ class dbConector {
       //Mongo
       if (!this.mongoConnected)
         await this.mongoConnect();
-
+      const result = await this.db.admin().ping();
+      console.log('MongoDB está conectado e respondendo');      
       return true;
 
     } catch (error) {
@@ -79,7 +80,7 @@ class dbConector {
       this.db = this.mongoClient.db(process.env.MONGO_DB);
       this.mongoConnected = true;      
       console.log('Conexão com MongoDB estabelecida com sucesso!');
-
+      this.makeIndex();
       return true;
 
     } catch (error) {
@@ -89,6 +90,12 @@ class dbConector {
       throw error;
 
     }
+  }
+
+  async makeIndex() {
+    // Criação de um índice TTL (expira em 24 horas) se não existir
+    const collection = this.db.collection(process.env.MONGO_IMGS);
+    collection.createIndex({ createdAt: 1 }, { expireAfterSeconds: 3600 * 24 });
   }
 
   async query(sql, params) {
@@ -101,12 +108,94 @@ class dbConector {
     }
   }
 
+  async find(collectionName, query = {}, options = {}) {
+    try {
+      const collection = await this.getCollection(collectionName);
+      return await collection.find(query, options).toArray();
+    } catch (error) {
+      console.error('Erro na consulta MongoDB:', error);
+      throw error;
+    }
+  }
+
+  async findOne(collectionName, query = {}, options = {}) {
+    try {
+      const collection = await this.getCollection(collectionName);
+      return await collection.findOne(query, options);
+    } catch (error) {
+      console.error('Erro na consulta MongoDB findOne:', error);
+      throw error;
+    }
+  }
+
+  async insertOne(collectionName, document) {
+    try {
+      const collection = await this.getCollection(collectionName);
+      return await collection.insertOne(document);
+    } catch (error) {
+      console.error('Erro ao inserir documento no MongoDB:', error);
+      throw error;
+    }
+  }
+
+  async updateOne(collectionName, filter, update, options = {}) {
+    try {
+      const collection = await this.getCollection(collectionName);
+      return await collection.updateOne(filter, update, options);
+    } catch (error) {
+      console.error('Erro ao atualizar documento no MongoDB:', error);
+      throw error;
+    }
+  }
+
+  async deleteOne(collectionName, filter) {
+    try {
+      const collection = await this.getCollection(collectionName);
+      return await collection.deleteOne(filter);
+    } catch (error) {
+      console.error('Erro ao remover documento no MongoDB:', error);
+      throw error;
+    }
+  }
+
+  async getCollection(collectionName) {
+    try {
+      if (!this.connected) {
+        await this.mongoConnect();
+      }
+      return this.db.collection(collectionName);
+    } catch (error) {
+      console.error(`Erro ao obter collection ${collectionName}:`, error);
+      throw error;
+    }
+  }
+
+  createObjectId(id) {
+    try {
+      return new ObjectId(id);
+    } catch (error) {
+      console.error('Erro ao criar ObjectId:', error);
+      throw error;
+    }
+  }
+
   async end() {
     try {
       await this.pool.end();
       console.log('Pool de conexões encerrado');
     } catch (error) {
       console.error('Erro ao encerrar pool de conexões:', error);
+      throw error;
+    }
+  }
+
+  async close() {
+    try {
+      await this.mongoClient.close();
+      console.log('Conexão com MongoDB encerrada');
+      this.connected = false;
+    } catch (error) {
+      console.error('Erro ao encerrar conexão MongoDB:', error);
       throw error;
     }
   }

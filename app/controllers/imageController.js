@@ -26,12 +26,12 @@ async function generateSignedUrl(bucket, fileName) {
         const options = {
             version: 'v4',
             action: 'read',
-            expires: Date.now() + 60 * 60 * 1000, // URL válida por 60 minutos
+            expires: Date.now() + 24 * 60 * 60 * 1000, // URL válida por 24h
         };
 
         // Gera a URL assinada
         const [url] = await file.getSignedUrl(options);
-        return url;
+        return { url, file };
 
     } catch (error) {
         console.error('Erro ao gerar URL assinada:', error);
@@ -65,13 +65,9 @@ class ImageController {
         const publicUrl = await generateSignedUrl(bucket, name);
         
         if(publicUrl)
-            res.status(200).json({
-                imageUrl: publicUrl
-            });
+            res.status(200).json({ imageUrl: publicUrl });
         else
-            res.status(500).json({
-                message: 'Erro ao gerar URL para a Imagem'
-            });
+            res.status(500).json({ message: 'Erro ao gerar URL para a Imagem' });
     }
     
     async postImage(req, res) {
@@ -129,18 +125,47 @@ class ImageController {
     async getGalleryItems (req, res) {
 
         try {
-            
+            //Recupera Parâmetros da Requisição
             const { max } = req.params;
+
+            //Monta Query 
             const query = `SELECT p.*, r.nome FROM portifolio p
                            INNER JOIN renderizador r ON r.id = p.idRenderizador
                            LIMIT ${max};`;
             const rows = await dbConnector.query(query);
 
-            console.log(rows);
             for (const row of rows) {
-                row.signedUrl = await generateSignedUrl(bucket, row.idImagem);
+
+                //Verifica se a imagem está cacheada
+                const fileName = row.idImagem;
+                const cachedImage = await dbConnector.findOne(process.env.MONGO_IMGS, { fileName }, {});
+                if (cachedImage) {
+                    //Retorna Imagem Cacheada
+                    console.log('Imagem encontrada no cache.');
+                    row.signedUrl = cachedImage.url;
+                    //row.buffer = Buffer.from(cachedImage.data, 'base64');
+                    row.buffer = cachedImage.data
+                }
+                else {
+                    //Gera nova URL e faz o Cache
+                    console.log('Imagem não encontrada no cache. Fazendo download do bucket...');
+                    const data = await generateSignedUrl(bucket, row.idImagem);
+                    row.signedUrl = data.url;
+                    const [buffer] = await data.file.download();
+
+                    // Armazena a imagem no MongoDB com um timestamp                    
+                    await dbConnector.insertOne(process.env.MONGO_IMGS, 
+                    {
+                        fileName,
+                        url: signedUrl,
+                        data: buffer.toString('base64'), // Converte para base64 para armazenar no Mongo
+                        createdAt: new Date() // Timestamp para controle do TTL
+                    });                    
+                    row.buffer = buffer.toString('base64');
+                }
+                
             }
-            console.log("Imagens: ", rows);
+            
             res.status(200).json({
                 rows
             });
