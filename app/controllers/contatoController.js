@@ -123,7 +123,7 @@ class contatoController {
                 const subject = 'Trabalhe Conosco: ' + nome;
                 const text = getEmailContentTrabalhe(nome);
                 await sendEmail(email, subject, text);
-                res.status(200).json({
+                res.status(204).json({
                     message: 'Solicitação de Contato criada com Sucesso!',
                     result: result.affectedRows
                 });

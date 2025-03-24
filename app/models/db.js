@@ -131,6 +131,7 @@ class dbConector {
   async insertOne(collectionName, document) {
     try {
       const collection = await this.getCollection(collectionName);
+      console.log('Inserindo dados no mongo...');
       return await collection.insertOne(document);
     } catch (error) {
       console.error('Erro ao inserir documento no MongoDB:', error);
@@ -160,7 +161,7 @@ class dbConector {
 
   async getCollection(collectionName) {
     try {
-      if (!this.connected) {
+      if (!this.mongoConnected) {
         await this.mongoConnect();
       }
       return this.db.collection(collectionName);
@@ -182,7 +183,7 @@ class dbConector {
   async end() {
     try {
       await this.pool.end();
-      console.log('Pool de conexões encerrado');
+      console.log('Pool de conexões encerrado.');
     } catch (error) {
       console.error('Erro ao encerrar pool de conexões:', error);
       throw error;
@@ -192,7 +193,7 @@ class dbConector {
   async close() {
     try {
       await this.mongoClient.close();
-      console.log('Conexão com MongoDB encerrada');
+      console.log('Conexão com MongoDB encerrada.');
       this.connected = false;
     } catch (error) {
       console.error('Erro ao encerrar conexão MongoDB:', error);

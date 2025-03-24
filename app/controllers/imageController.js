@@ -41,10 +41,10 @@ async function generateSignedUrl(bucket, fileName) {
 
 async function storeImageData(imageName, renderizador, titulo) {
     try {
-        
+
         //Monta Query
-        const query = `INSERT INTO portifolio (idImagem, idRenderizador, titulo) VALUES (?,?,?);`;       
-        return await dbConnector.query(query, [imageName,renderizador,titulo]);
+        const query = `INSERT INTO portifolio (idImagem, idRenderizador, titulo) VALUES (?,?,?);`;
+        return await dbConnector.query(query, [imageName, renderizador, titulo]);
 
     } catch (error) {
         console.error('Erro ao gravar Imagem no BD:', error);
@@ -54,22 +54,21 @@ async function storeImageData(imageName, renderizador, titulo) {
 
 class ImageController {
 
-    async genSignedUrl (bucket, filename)
-    {
+    async genSignedUrl(bucket, filename) {
         return generateSignedUrl(bucket, filename);
     }
 
-    async getURLByImageName (req, res) {
+    async getURLByImageName(req, res) {
 
         const { name } = req.params;
         const publicUrl = await generateSignedUrl(bucket, name);
-        
-        if(publicUrl)
+
+        if (publicUrl)
             res.status(200).json({ imageUrl: publicUrl });
         else
             res.status(500).json({ message: 'Erro ao gerar URL para a Imagem' });
     }
-    
+
     async postImage(req, res) {
 
         try {
@@ -100,7 +99,7 @@ class ImageController {
                 //const publicUrl = `https://storage.googleapis.com/${bucketName}/${filename}`;
 
                 const publicUrl = await generateSignedUrl(bucket, filename);
-                const qReturn   = await storeImageData(filename, req.body.sender, req.body.title);
+                const qReturn = await storeImageData(filename, req.body.sender, req.body.title);
 
                 res.status(200).json({
                     message: 'Upload Realizado com Sucesso!',
@@ -122,7 +121,7 @@ class ImageController {
         }
     };
 
-    async getGalleryItems (req, res) {
+    async getGalleryItems(req, res) {
 
         try {
             //Recupera Parâmetros da Requisição
@@ -147,30 +146,43 @@ class ImageController {
                     row.buffer = cachedImage.data
                 }
                 else {
-                    //Gera nova URL e faz o Cache
-                    console.log('Imagem não encontrada no cache. Fazendo download do bucket...');
-                    const data = await generateSignedUrl(bucket, row.idImagem);
-                    row.signedUrl = data.url;
-                    const [buffer] = await data.file.download();
 
-                    // Armazena a imagem no MongoDB com um timestamp                    
-                    await dbConnector.insertOne(process.env.MONGO_IMGS, 
-                    {
-                        fileName,
-                        url: signedUrl,
-                        data: buffer.toString('base64'), // Converte para base64 para armazenar no Mongo
-                        createdAt: new Date() // Timestamp para controle do TTL
-                    });                    
-                    row.buffer = buffer.toString('base64');
+                    try {
+
+                        //Gera nova URL e faz o Cache
+                        console.log(`Imagem ${row.idImagem} não encontrada no cache. Fazendo download do bucket...`);
+                        const data = await generateSignedUrl(bucket, row.idImagem);
+                        console.log('URL gerada...');
+                        row.signedUrl = data.url;
+                        const [buffer] = await data.file.download();
+                        console.log('Buffer gerado...');
+
+                        // Armazena a imagem no MongoDB com um timestamp                    
+                        const base64 = buffer.toString('base64');
+                        const isId = await dbConnector.insertOne(process.env.MONGO_IMGS,
+                            {
+                                fileName,
+                                url: row.signedUrl,
+                                data: base64, // Converte para base64 para armazenar no Mongo
+                                createdAt: new Date() // Timestamp para controle do TTL
+                            });
+                        console.log(`${isId} Buffer armazenado...`);
+                        row.buffer = base64;
+
+                    } catch (error) {
+                        throw error;
+                    }
                 }
-                
+
             }
-            
+
+            //Retorna resultado
             res.status(200).json({
                 rows
             });
 
         } catch (error) {
+            console.log("Erro ao gerar URL's:", error);
             res.status(500).json({
                 message: 'Erro no listar Itens da Galeria',
                 error: error.message
