@@ -42,6 +42,10 @@ module.exports = app => {
         controller.getURLByImageName
     )
 
+    router.get('/url/:imagem',
+        controller.getImage
+    );
+
     // Error handling middleware
     router.use((error, req, res, next) => {
         if (error instanceof multer.MulterError) {

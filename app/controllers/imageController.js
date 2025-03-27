@@ -133,58 +133,74 @@ class ImageController {
                            LIMIT ${max};`;
             const rows = await dbConnector.query(query);
 
-            for (const row of rows) {
-
-                //Verifica se a imagem está cacheada
-                const fileName = row.idImagem;
-                const cachedImage = await dbConnector.findOne(process.env.MONGO_IMGS, { fileName }, {});
-                if (cachedImage) {
-                    //Retorna Imagem Cacheada
-                    console.log('Imagem encontrada no cache.');
-                    row.signedUrl = cachedImage.url;
-                    //row.buffer = Buffer.from(cachedImage.data, 'base64');
-                    row.buffer = cachedImage.data
-                }
-                else {
-
-                    try {
-
-                        //Gera nova URL e faz o Cache
-                        console.log(`Imagem ${row.idImagem} não encontrada no cache. Fazendo download do bucket...`);
-                        const data = await generateSignedUrl(bucket, row.idImagem);
-                        console.log('URL gerada...');
-                        row.signedUrl = data.url;
-                        const [buffer] = await data.file.download();
-                        console.log('Buffer gerado...');
-
-                        // Armazena a imagem no MongoDB com um timestamp                    
-                        const base64 = buffer.toString('base64');
-                        const isId = await dbConnector.insertOne(process.env.MONGO_IMGS,
-                            {
-                                fileName,
-                                url: row.signedUrl,
-                                data: base64, // Converte para base64 para armazenar no Mongo
-                                createdAt: new Date() // Timestamp para controle do TTL
-                            });
-                        console.log(`${isId} Buffer armazenado...`);
-                        row.buffer = base64;
-
-                    } catch (error) {
-                        throw error;
-                    }
-                }
-
-            }
-
             //Retorna resultado
             res.status(200).json({
                 rows
             });
 
         } catch (error) {
-            console.log("Erro ao gerar URL's:", error);
+            console.log("Erro ao listar Itens da Galeria", error);
             res.status(500).json({
                 message: 'Erro no listar Itens da Galeria',
+                error: error.message
+            });
+        }
+    }
+
+    async getImage(req, res) {
+
+        try {
+            
+            //Recupera Parâmetro da Requisição
+            const { imagem } = req.params;
+
+            //Verifica se a imagem está cacheada
+            const fileName = imagem;
+            const cachedImage = await dbConnector.findOne(process.env.MONGO_IMGS, { fileName }, {});
+            if (cachedImage) {
+                //Retorna Imagem Cacheada
+                console.log('Imagem encontrada no cache.');
+                //row.signedUrl = cachedImage.url;
+                const buffer = Buffer.from(cachedImage.data, 'base64');
+                res.setHeader('Content-Type', 'image/jpeg');
+                res.send(buffer);
+            }
+            else {
+
+                try {
+
+                    //Gera nova URL e faz o Cache
+                    console.log(`Imagem ${row.idImagem} não encontrada no cache. Fazendo download do bucket...`);
+                    const data = await generateSignedUrl(bucket, row.idImagem);
+                    console.log('URL gerada...');
+                    //row.signedUrl = data.url;
+                    const [buffer] = await data.file.download();
+                    console.log('Buffer gerado...');
+
+                    // Armazena a imagem no MongoDB com um timestamp                    
+                    const base64 = buffer.toString('base64');
+                    const isId = await dbConnector.insertOne(process.env.MONGO_IMGS,
+                        {
+                            fileName,
+                            url: row.signedUrl,
+                            data: base64, // Converte para base64 para armazenar no Mongo
+                            createdAt: new Date() // Timestamp para controle do TTL
+                        });
+                    console.log(`${isId} Buffer armazenado...`);
+                    //row.buffer = base64;
+                    
+                    res.setHeader('Content-Type', 'image/jpeg');
+                    res.send(buffer);
+
+                } catch (error) {
+                    throw error;
+                }
+            }
+
+        } catch (error) {
+            console.log("Erro ao gerar URL da Imagem:", error);
+            res.status(500).json({
+                message: 'Erro ao gerar URL da Imagem',
                 error: error.message
             });
         }
