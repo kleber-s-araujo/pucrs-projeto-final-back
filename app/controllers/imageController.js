@@ -172,21 +172,21 @@ class ImageController {
                     //Gera nova URL e faz o Cache
                     console.log(`Imagem ${imagem} não encontrada no cache. Fazendo download do bucket...`);
                     const data = await generateSignedUrl(bucket, imagem);
-                    console.log('URL gerada...');
+                    //console.log('URL gerada...');
                     //row.signedUrl = data.url;
                     const [buffer] = await data.file.download();
-                    console.log('Buffer gerado...');
+                    //console.log('Buffer gerado...');
 
                     // Armazena a imagem no MongoDB com um timestamp                    
                     const base64 = buffer.toString('base64');
                     const isId = await dbConnector.insertOne(process.env.MONGO_IMGS,
                         {
                             fileName,
-                            url: row.signedUrl,
+                            url:  data.url,
                             data: base64, // Converte para base64 para armazenar no Mongo
                             createdAt: new Date() // Timestamp para controle do TTL
                         });
-                    console.log(`${isId} Buffer armazenado...`);
+                    //console.log(`Buffer armazenado...`);
                     //row.buffer = base64;
                     
                     res.setHeader('Content-Type', 'image/jpeg');
