@@ -170,8 +170,8 @@ class ImageController {
                 try {
 
                     //Gera nova URL e faz o Cache
-                    console.log(`Imagem ${row.idImagem} não encontrada no cache. Fazendo download do bucket...`);
-                    const data = await generateSignedUrl(bucket, row.idImagem);
+                    console.log(`Imagem ${imagem} não encontrada no cache. Fazendo download do bucket...`);
+                    const data = await generateSignedUrl(bucket, imagem);
                     console.log('URL gerada...');
                     //row.signedUrl = data.url;
                     const [buffer] = await data.file.download();
